@@ -1,0 +1,2 @@
+octorest>=0.3
+pygobject>=3.22.0
