@@ -44,8 +44,8 @@ def LabelWithImage(img, label, *args):
 # ButtonImage returns a new gtk.Button with the given label, image and
 # clicked callback.
 
-def ButtonImageStyle(label, img, style, clicked):
-    b = ButtonImage(label, img, clicked)
+def ButtonImageStyle(label, img, style, clicked, parms=None):
+    b = ButtonImage(label, img, clicked, parms)
 
     ctx = b.get_style_context()
     ctx.add_class(style)
@@ -53,7 +53,7 @@ def ButtonImageStyle(label, img, style, clicked):
     return b
 
 
-def ButtonImage(label, imgName, clicked):
+def ButtonImage(label, imgName, clicked, parms=None):
     img = ImageFromFile(imgName)
     b = Gtk.Button(label=label)
     b.set_image(img)
@@ -63,6 +63,9 @@ def ButtonImage(label, imgName, clicked):
     b.set_hexpand(True)
 
     if clicked is not None:
-        b.connect("clicked", clicked)
+        if parms is None:
+            b.connect("clicked", clicked)
+        else:
+            b.connect("clicked", clicked, parms)
 
     return b

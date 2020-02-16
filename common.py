@@ -1,12 +1,21 @@
-import threading
-import functools
 import math
+import threading
+import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
+
 import igtk
+
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
 
 class CommonPanel:
     panelH: int
@@ -44,58 +53,65 @@ class CommonPanel:
 
     def Show(self):
         if self.bkgnd is not None:
-            self.bkgnd.start()
+            self.bkgnd.start(self.parent)
 
     def Hide(self):
         if self.bkgnd is not None:
-            self.bkgnd.cancel()
+            self.bkgnd.cancel(self.parent)
 
     def Scaled(self, val):
         return self.ui.scalef * val
 
-class TimerTask(Thread):
-    thread: threading.Timer
+    def arrangeMenuItems(self, grid, items, cols):
+        from menu import getPanel
+        for i in range(len(items)):
+            item = items[i]
+            panel = getPanel(self.ui, self, item)
 
-    def __init__(self, interval, callback):
+            if panel is not None:
+                    color = "color{:d}".format((i % 4) + 1)
+                    icon = "{:s}.svg".format(item['icon'])
+
+                    grid.attach(igtk.ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
+                                (i % cols) + 1, i / cols, 1, 1)
+
+    def addPanel(self, source, panel):
+        self.ui.Add(panel)
+
+class TimerTask(threading.Timer):
+    def __init__(self, interval, callback, event):
+        threading.Timer.__init__(self, interval, callback)
         self.interval = interval
-        self.running = False
-        self.lock = threading.Lock()
+        self.callback = callback
+        self.stopped = event
 
-        @functools.wraps(callback)
-        def wrapper(*args, **kwargs):
-            result = callback(*args, **kwargs)
-            if result:
-                self.thread = threading.Timer(self.interval, self.callback)
-                self.thread.start()
-            else:
-                self.thread.cancel()
-                self.running = False
-                print("Background task failed to queue callback - exiting")
+    def run(self):
+        while not self.stopped.wait(self.interval):
+            self.callback(*self.args, **self.kwargs)
+        logging.info("Timer {} exit".format(self.getName()))
 
-        self.callback = wrapper
-
-class BackgroundTask(TimerTask):
-    def __init__(self, interval, idleTask):
-        TimerTask.__init__(self, interval, self.queueIt)
+class BackgroundTask():
+    def __init__(self, ui, interval, idleTask):
+        self.stopFlag = threading.Event()
         self.idleTask = idleTask
+        self.lock = threading.Lock()
+        self.interval = interval
+        # Add to timer thread rundown list in UI
+        ui._rundown.append(self)
 
     def queueIt(self):
         return GLib.idle_add(self.idleTask)
 
     def start(self, source):
         with self.lock:
-            self.thread = threading.Timer(self.interval, self.callback)
+            self.thread = TimerTask(self.interval, self.queueIt, self.stopFlag)
             self.thread.start()
-            self.running = True
-            print("Background task started")
+            logging.info("Background task {} started".format(self.thread.getName()))
             return
 
     def cancel(self, source):
         with self.lock:
-            if self.running:
-                self.thread.cancel()
-                self.running = False
-                print("Background task stopped")
+            if self.thread.isAlive():
+                self.stopFlag.set()
+                self.thread.join()
             return
-
-

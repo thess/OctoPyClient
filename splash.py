@@ -65,11 +65,11 @@ class SP(CommonPanel):
         self.RetryButton.hide()
         ctx = self.RetryButton.get_style_context()
         ctx.add_class("hidden")
-        self.label.set_text("Loading...")
+        self.label.set_text("Startup...")
         self.ui.connectionAttempts = 0
 
     def showSystem(self):
-        return
+        self.ui.Add(SystemPanel(self.ui, self))
 
     def showNetwork(self):
-        return
+        self.ui.Add(NetworkPanel(self.ui, self))

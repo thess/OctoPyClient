@@ -7,8 +7,8 @@ Hostname or IP of Octoprint (default: localhost:5000)
 Command-line opts:
 
 -h, --help      This text
--v, --verbose   Turn on debug output
--k, --key       Octoprint API key
+-v, --log       Specify log verbosity level (INFO, WARN, etc.)
+-k, --key       Octoprint API key (mandatory)
 -s, --style     Location of CSS style sheet (default: style.css)
 -l, --layout    Screen resolution (default: 480x320)
 -c, --config    Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
@@ -16,15 +16,13 @@ Command-line opts:
 """
 
 import sys
-import traceback
-import time
 import getopt
+import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from octorest import OctoRest
 from ui import UI
 
 
@@ -43,21 +41,21 @@ def main(argv=None):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hvk:s:r:c:", ["help", "verbose", "key=",
+            opts, args = getopt.getopt(argv[1:], "hl:k:s:r:c:", ["help", "log=", "key=",
                                                                 "style=", "resolution=", "config="])
         except getopt.error as msg:
             raise Usage(msg)
 
         # Gather command options
-        debug_output = False
+        loglevel = logging.WARNING
         api_key = None
         width = 480
         height = 320
 
         for o, v in opts:
-            if o == '-v':
-                debug_output = True
-            if o in ["-h", "--help"]:
+            if o in ['-v', '--log']:
+                loglevel = getattr(logging, v.upper())
+            if o in ['-h', '--help']:
                 print(__doc__)
                 return
             if o in ['-k', '--key']:
@@ -71,6 +69,11 @@ def main(argv=None):
             raise Usage("Octoprint API key required")
 
         try:
+            logging.basicConfig(level=loglevel, stream=sys.stdout,
+                                format='%(asctime)s.%(msecs)03d  OctoPyClient'
+                                        '%(levelname)8s %(filename)s:%(lineno)d - %(message)s',
+                                datefmt='%H:%M:%S')
+
             Gtk.init()
             settings = Gtk.Settings.get_default()
             settings.set_property("gtk_application_prefer_dark_theme", True)
@@ -78,6 +81,7 @@ def main(argv=None):
             ui = UI(args[0], api_key, width, height)
 
             ui.show_all()
+            ui.n.notify('READY=1')
 
             Gtk.main()
 
@@ -87,8 +91,7 @@ def main(argv=None):
             # Cleanup connection
             if exc_type == KeyboardInterrupt:
                 return 0
-            eprint("-->Caught network or other error:")
-            traceback.print_exception(exc_type, exc_value, exc_tb)
+            logging.exception("Caught network or other error:")
 
     except Usage as err:
         # Cleanup connection

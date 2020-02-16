@@ -1,4 +1,7 @@
+import sys
 import time
+import sdnotify
+import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -7,6 +10,7 @@ from gi.repository import Gtk, Gdk
 from octorest import OctoRest
 from splash import SP
 from common import BackgroundTask
+from idle_status import idleStatusPanel
 
 
 def errToUser(err):
@@ -14,9 +18,9 @@ def errToUser(err):
     if "connection refused" in text:
         return "Unable to connect to Octoprint - is it running?"
     elif "request canceled" in text:
-        return "Loading..."
+        return "Starting..."
     elif "connection broken" in text:
-        return "Loading..."
+        return "Starting..."
 
     return "Unexpected error: {}".format(err)
 
@@ -32,6 +36,8 @@ def get_version(client):
     return message
 
 class UI(Gtk.Window):
+    _rundown = []
+
     def __init__(self, host, key, width, height):
         Gtk.Window.__init__(self, title="OctoPyClient")
 
@@ -45,9 +51,10 @@ class UI(Gtk.Window):
         self.Settings = None
         self.UIState = None
         self.pState = None
+        self.n = sdnotify.SystemdNotifier()
 
         self.sp = SP(self)
-        self.bkgnd = BackgroundTask(2, self.update)
+        self.bkgnd = BackgroundTask(self, 2, self.update)
 
         css_provider = Gtk.CssProvider()
         css_provider.load_from_path('./styles/style.css')
@@ -78,15 +85,15 @@ class UI(Gtk.Window):
         self.g.show_all()
 
     def Quit(self, p):
-        if self.bkgnd is not None:
-            self.bkgnd.cancel(p)
+        for t in self._rundown:
+            t.cancel(p)
         Gtk.main_quit()
 
     def Remove(self, p):
         self.g.remove(p.g)
         p.Hide()
 
-    def navHistory(self):
+    def navHistory(self, source):
         self.Add(self.current.parent)
 
     def update(self):
@@ -101,14 +108,14 @@ class UI(Gtk.Window):
         self.verifyConnection()
 
     def verifyConnection(self):
-        #self.sdNotify("WATCHDOG=1")
+        self.n.notify("WATCHDOG=1")
 
         newUiState = "splash"
         splashMessage = "Initializing..."
 
         try:
             self.pState = self.Printer.state()
-            print("Polled state = {}".format(self.pState))
+            logging.debug("Polled state = {}".format(self.pState))
             if self.pState == 'Operational':
                 newUiState = "idle"
             elif self.pState == "Printing":
@@ -119,7 +126,7 @@ class UI(Gtk.Window):
                 print(">Attempting to connect")
                 self.Printer.connect()
                 newUiState = "splash"
-                splashMessage = "Loading..."
+                splashMessage = "Startup..."
             elif self.pState == "Connecting":
                     splashMessage = self.pState + "..."
         except Exception as err:
@@ -127,7 +134,7 @@ class UI(Gtk.Window):
                 splashMessage = errToUser(err)
 
                 newUiState = "splash"
-                print("Unexpected error: {}", err)
+                logging.error("Unexpected error: {}", err)
 
         self.sp.label.set_text(splashMessage)
 
@@ -135,26 +142,12 @@ class UI(Gtk.Window):
             return
 
         if newUiState == "idle":
-                print("Printer is ready")
-               #self.Add(IdleStatusPanel(self)
+                logging.info("Printer is ready")
+                self.Add(idleStatusPanel(self))
         elif newUiState == "printing":
-                print("Printing a job")
-                #i.Add(PrintStatusPanel(self)
+                logging.info("Printing a job")
+                #self.Add(PrintStatusPanel(self))
         elif newUiState == "splash":
             self.Add(self.sp)
 
         self.UIState = newUiState
-
-    def client_test(self):
-        # Testing octorest
-        client = make_client(self.host, self.key)
-        print(get_version(client))
-        print("Current state: ", client.state())
-        while client.state() != 'Operational':
-            print("Connecting...")
-            client.connect()
-            time.sleep(5)
-
-        printer_state = client.printer()
-        print('Bed temp: {:4.1f}, Extruder: {:4.1f}'.format(printer_state['temperature']['bed']['actual'],
-                                                            printer_state['temperature']['tool0']['actual']))
