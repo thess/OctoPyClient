@@ -3,6 +3,7 @@ import logging
 import threading
 
 from octorest import OctoRest
+from files import FilesPanel
 
 import gi
 gi.require_version('Gtk', '3.0')

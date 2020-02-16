@@ -1,8 +1,15 @@
 # Menu templates from OctoScreen
 
-import json
-from home import HomePanel
 from common import CommonPanel
+from home import HomePanel
+from move import MovePanel
+from extrude import ExtrudePanel
+from control import ControlPanel
+from fan import FanPanel
+from system import SystemPanel
+from network import NetworkPanel
+from temperature import TemperaturePanel
+from filament import FilamentPanel
 
 class MenuPanel(CommonPanel):
     def __init__(self, ui, parent, items):
@@ -41,7 +48,7 @@ def getPanel(ui, parent, item):
 
 DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                 {'name': 'Actions', 'icon': 'actions2', 'panel': 'menu', 'items':
-                    [{'name': 'Move', 'icon': 'move2', 'panel': 'move'},
+                    [{'name': 'Move', 'icon': 'move', 'panel': 'move'},
                      {'name': 'Extrude', 'icon': 'filament', 'panel': 'extrude'},
                      {'name': 'Fan', 'icon': 'fan', 'panel': 'fan'},
                      {'name': 'Temperature', 'icon': 'heat-up', 'panel': 'temperature'},

@@ -5,6 +5,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common import CommonPanel
+from system import SystemPanel
+from network import NetworkPanel
 import igtk
 
 
