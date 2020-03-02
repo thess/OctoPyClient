@@ -18,5 +18,6 @@ class HomePanel(CommonPanel, metaclass=Singleton):
         return igtk.ButtonImageStyle(label, image, "color2", self.homeRequest, axes)
 
     def homeRequest(self, source, axes):
-        logging.info("Homing {} axes".format(axes))
-        return
+        logging.debug("Homing {} axes".format(axes))
+        self.ui.Printer.home(axes)
+ 

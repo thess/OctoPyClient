@@ -88,19 +88,16 @@ def main(argv=None):
 
         except:
             exc_type, exc_value, exc_tb = sys.exc_info()
-            # Cleanup connection
             if exc_type == KeyboardInterrupt:
                 return 0
             logging.exception("Caught network or other error:")
 
     except Usage as err:
-        # Cleanup connection
         eprint(err.msg)
         eprint("for help use --help")
         return 2
 
     finally:
-        # Cleanup connection
         return
 
 

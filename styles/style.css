@@ -53,19 +53,19 @@ button:active {
 }
 
 button.color1 {
-	border-bottom: 8px solid #ED6500;
+	border-bottom: 6px solid #ED6500;
 }
 
 button.color2 {
-	border-bottom: 8px solid #B10080;
+	border-bottom: 6px solid #B10080;
 }
 
 button.color3 {
-	border-bottom: 8px solid #009384;
+	border-bottom: 6px solid #009384;
 }
 
 button.color4 {
-	border-bottom: 8px solid #A7E100;
+	border-bottom: 6px solid #A7E100;
 }
 
 button.active {
@@ -95,7 +95,12 @@ button.keyboard {
 	border: 2px solid #333333;
 	font-size: 16px;
 	padding: 5px;
+	background-color: #FFF;
+}
+
+.dialog button {
 	background-color: #000;
+	color: #FFF;
 }
 
 .message {

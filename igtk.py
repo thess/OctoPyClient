@@ -2,7 +2,8 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
+from gi.repository import Gdk, GdkPixbuf
 from attr import dataclass
 
 def imagePath(iname):
@@ -18,10 +19,10 @@ def ImageFromFile(imgname):
     img.set_from_file(imagePath(imgname))
     return img
 
-def ImageFromFileWithSize(img, w, h):
-    p = Gdk.Pixbuf.new_from_file_at_scale(imagePath(img), w, h, True)
-    i = Gtk.Image.new_from_pixbuf(p)
-    return i
+def ImageFromFileWithSize(imgname, w, h):
+    p = GdkPixbuf.Pixbuf.new_from_file_at_scale(imagePath(imgname), w, h, True)
+    img = Gtk.Image.new_from_pixbuf(p)
+    return img
 
 @dataclass
 class imageLabel:
@@ -35,32 +36,19 @@ LABEL_IMAGE_SIZE = 60
 def LabelWithImage(img, label, *args):
     l = FmtLabel(label, args)
     b = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-    b.Add(ImageFromFileWithSize(img, LABEL_IMAGE_SIZE, LABEL_IMAGE_SIZE))
-    b.Add(l)
+    b.add(ImageFromFileWithSize(img, LABEL_IMAGE_SIZE, LABEL_IMAGE_SIZE))
+    b.add(l)
 
     return imageLabel(l, b)
-
 
 # ButtonImage returns a new gtk.Button with the given label, image and
 # clicked callback.
 
-def ButtonImageStyle(label, img, style, clicked, parms=None):
-    b = ButtonImage(label, img, clicked, parms)
-
-    ctx = b.get_style_context()
-    ctx.add_class(style)
-
-    return b
-
-
-def ButtonImage(label, imgName, clicked, parms=None):
-    img = ImageFromFile(imgName)
+def ButtonImage(label, img, clicked, parms=None):
     b = Gtk.Button(label=label)
     b.set_image(img)
     b.set_always_show_image(True)
     b.set_image_position(Gtk.PositionType.TOP)
-    b.set_vexpand(True)
-    b.set_hexpand(True)
 
     if clicked is not None:
         if parms is None:
@@ -68,4 +56,26 @@ def ButtonImage(label, imgName, clicked, parms=None):
         else:
             b.connect("clicked", clicked, parms)
 
+    return b
+
+# Return gtk.Button with image and applied style
+def ButtonImageStyle(label, imgName, style, clicked, parms=None):
+    b = ButtonImageFromFile(label, imgName, clicked, parms)
+
+    ctx = b.get_style_context()
+    ctx.add_class(style)
+
+    return b
+
+# Return gtk.Button with image sized (h x w) as specified
+def ButtonImageWithSize(imgName, h, w, clicked, parms=None):
+    img = ImageFromFileWithSize(imgName, h, w)
+    return ButtonImage(None, img, clicked, parms)
+
+# Return gtk.Button with image expanded to fit
+def ButtonImageFromFile(label, imgName, clicked, parms=None):
+    img = ImageFromFile(imgName)
+    b = ButtonImage(label, img, clicked, parms)
+    b.set_vexpand(True)
+    b.set_hexpand(True)
     return b

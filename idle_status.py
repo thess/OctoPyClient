@@ -33,7 +33,7 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         self.arrangeButtons()
 
     def showFiles(self, source):
-        self.ui.Add(FilesPanel(self.ui, self))
+        self.ui.OpenPanel(FilesPanel(self.ui, self))
 
     def update(self):
         self.updateTemperature()
@@ -76,7 +76,7 @@ class Tool:
         self.printer = printer
         self.isHeating = False
         self.lock = threading.Lock()
-        self.button = igtk.ButtonImage("", image, None)
+        self.button = igtk.ButtonImageFromFile("", image, None)
         self.button.connect("clicked", self.clicked)
 
     def clicked(self, source):

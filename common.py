@@ -9,6 +9,7 @@ from gi.repository import GLib
 
 import igtk
 
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -42,7 +43,7 @@ class CommonPanel:
         for i in range(len(self.buttons) + 1, last):
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
-        self.back = igtk.ButtonImage("Back", "back.svg", self.ui.navHistory)
+        self.back = igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory)
         self.addButton(self.back)
 
     def addButton(self, btn):
@@ -76,7 +77,7 @@ class CommonPanel:
                                 (i % cols) + 1, i / cols, 1, 1)
 
     def addPanel(self, source, panel):
-        self.ui.Add(panel)
+        self.ui.OpenPanel(panel)
 
 class TimerTask(threading.Timer):
     def __init__(self, interval, callback, event):

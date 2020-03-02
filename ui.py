@@ -1,4 +1,3 @@
-import sys
 import time
 import sdnotify
 import logging
@@ -8,21 +7,11 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 from octorest import OctoRest
-from splash import SP
+from splash import SplashPanel
 from common import BackgroundTask
 from idle_status import idleStatusPanel
-
-
-def errToUser(err):
-    text = err.args[0]['text']
-    if "connection refused" in text:
-        return "Unable to connect to Octoprint - is it running?"
-    elif "request canceled" in text:
-        return "Starting..."
-    elif "connection broken" in text:
-        return "Starting..."
-
-    return "Unexpected error: {}".format(err)
+from print_status import PrintStatusPanel
+import utils
 
 def make_client(url, key):
     try:
@@ -41,6 +30,7 @@ class UI(Gtk.Window):
     def __init__(self, host, key, width, height):
         Gtk.Window.__init__(self, title="OctoPyClient")
 
+        self.win = self
         self.host = host
         self.key = key
         self.scalef = 1.0
@@ -53,7 +43,7 @@ class UI(Gtk.Window):
         self.pState = None
         self.n = sdnotify.SystemdNotifier()
 
-        self.sp = SP(self)
+        self.sp = SplashPanel(self)
         self.bkgnd = BackgroundTask(self, 2, self.update)
 
         css_provider = Gtk.CssProvider()
@@ -75,11 +65,11 @@ class UI(Gtk.Window):
         self.g = Gtk.Grid()
         o.add(self.g)
 
-    def Add(self, p):
+    def OpenPanel(self, panel):
         if self.current is not None:
             self.Remove(self.current)
 
-        self.current = p
+        self.current = panel
         self.current.Show()
         self.g.attach(self.current.g, 1, 0, 1, 1)
         self.g.show_all()
@@ -94,7 +84,7 @@ class UI(Gtk.Window):
         p.Hide()
 
     def navHistory(self, source):
-        self.Add(self.current.parent)
+        self.OpenPanel(self.current.parent)
 
     def update(self):
         if self.connectionAttempts > 8:
@@ -123,7 +113,7 @@ class UI(Gtk.Window):
             elif self.pState == "Error":
                 pass
             elif self.pState == "Closed":
-                print(">Attempting to connect")
+                logging.info("Attempting to connect")
                 self.Printer.connect()
                 newUiState = "splash"
                 splashMessage = "Startup..."
@@ -131,7 +121,7 @@ class UI(Gtk.Window):
                     splashMessage = self.pState + "..."
         except Exception as err:
             if (time.time() - self.now) > 10:
-                splashMessage = errToUser(err)
+                splashMessage = utils.errToUser(err)
 
                 newUiState = "splash"
                 logging.error("Unexpected error: {}", err)
@@ -143,11 +133,11 @@ class UI(Gtk.Window):
 
         if newUiState == "idle":
                 logging.info("Printer is ready")
-                self.Add(idleStatusPanel(self))
+                self.OpenPanel(idleStatusPanel(self))
         elif newUiState == "printing":
                 logging.info("Printing a job")
-                #self.Add(PrintStatusPanel(self))
+                self.OpenPanel(PrintStatusPanel(self.ui, self))
         elif newUiState == "splash":
-            self.Add(self.sp)
+            self.OpenPanel(self.sp)
 
         self.UIState = newUiState

@@ -10,7 +10,7 @@ from network import NetworkPanel
 import igtk
 
 
-class SP(CommonPanel):
+class SplashPanel(CommonPanel):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui, None)
 
@@ -71,7 +71,7 @@ class SP(CommonPanel):
         self.ui.connectionAttempts = 0
 
     def showSystem(self):
-        self.ui.Add(SystemPanel(self.ui, self))
+        self.ui.OpenPanel(SystemPanel(self.ui, self))
 
     def showNetwork(self):
-        self.ui.Add(NetworkPanel(self.ui, self))
+        self.ui.OpenPanel(NetworkPanel(self.ui, self))
