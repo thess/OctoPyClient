@@ -29,7 +29,7 @@ class imageLabel:
     l: Gtk.Label
     b: Gtk.Box
 
-LABEL_IMAGE_SIZE = 60
+LABEL_IMAGE_SIZE = 20
 
 # LabelWithImage returns a new imageLabel based on a gtk.Box containing
 # a gtk.Label with a gtk.Image, the image is scaled at LABEL_IMAGE_SIZE.

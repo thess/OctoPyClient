@@ -44,7 +44,7 @@ class UI(Gtk.Window):
         self.n = sdnotify.SystemdNotifier()
 
         self.sp = SplashPanel(self)
-        self.bkgnd = BackgroundTask(self, 2, self.update)
+        self.bkgnd = BackgroundTask(self, 'status_check', 2, self.update)
 
         css_provider = Gtk.CssProvider()
         css_provider.load_from_path('./styles/style.css')
@@ -87,15 +87,20 @@ class UI(Gtk.Window):
         self.OpenPanel(self.current.parent)
 
     def update(self):
-        if self.connectionAttempts > 8:
-            self.sp.putOnHold()
-            return
-        elif self.UIState == "splash":
-            self.connectionAttempts += 1
-        else:
-            self.connectionAttempts = 0
+        if self.bkgnd.lock.acquire(False):
+            try:
+                if self.connectionAttempts > 8:
+                    self.sp.putOnHold()
+                    return
+                elif self.UIState == "splash":
+                    self.connectionAttempts += 1
+                else:
+                    self.connectionAttempts = 0
 
-        self.verifyConnection()
+                self.verifyConnection()
+            finally:
+                self.bkgnd.lock.release()
+
 
     def verifyConnection(self):
         self.n.notify("WATCHDOG=1")
@@ -136,7 +141,7 @@ class UI(Gtk.Window):
                 self.OpenPanel(idleStatusPanel(self))
         elif newUiState == "printing":
                 logging.info("Printing a job")
-                self.OpenPanel(PrintStatusPanel(self.ui, self))
+                self.OpenPanel(PrintStatusPanel(self, self))
         elif newUiState == "splash":
             self.OpenPanel(self.sp)
 

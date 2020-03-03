@@ -38,4 +38,3 @@ def emptyContainer(list):
     ch = Gtk.Container.get_children(list)
     for widget in ch:
         list.remove(widget)
-

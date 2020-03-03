@@ -2,8 +2,8 @@
 import logging
 import threading
 
-from octorest import OctoRest
 from files import FilesPanel
+from print_status import PrintStatusPanel
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -18,7 +18,7 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         CommonPanel.__init__(self, ui, None)
         logging.debug("idleStatusPanel created")
         self.panelH = 3
-        self.bkgnd = BackgroundTask(ui, 2, self.update)
+        self.bkgnd = BackgroundTask(ui, 'temp_update', 2, self.update)
         # Specify menu buttons
         menuItems = menu.getDefaultMenu()
         buttons = Gtk.Grid()
@@ -36,7 +36,11 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         self.ui.OpenPanel(FilesPanel(self.ui, self))
 
     def update(self):
-        self.updateTemperature()
+        if self.bkgnd.lock.acquire(False):
+            try:
+                self.updateTemperature()
+            finally:
+                self.bkgnd.lock.release()
 
     def showTools(self, ui):
         self.extruder = Tool("Extruder", "extruder2.svg", ui.Printer)

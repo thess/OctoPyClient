@@ -34,7 +34,7 @@ class CommonPanel:
         self.g.set_row_homogeneous(True)
         self.g.set_column_homogeneous(True)
 
-    def arrangeButtons(self):
+    def arrangeButtons(self, bAddBack=True):
         last = self.panelW * self.panelH
         if last < len(self.buttons):
             cols = math.ceil(float(len(self.buttons)) / float(self.panelW))
@@ -43,8 +43,9 @@ class CommonPanel:
         for i in range(len(self.buttons) + 1, last):
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
-        self.back = igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory)
-        self.addButton(self.back)
+        if bAddBack:
+            self.back = igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory)
+            self.addButton(self.back)
 
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
@@ -80,8 +81,9 @@ class CommonPanel:
         self.ui.OpenPanel(panel)
 
 class TimerTask(threading.Timer):
-    def __init__(self, interval, callback, event):
+    def __init__(self, name, interval, callback, event):
         threading.Timer.__init__(self, interval, callback)
+        self.setName(name)
         self.interval = interval
         self.callback = callback
         self.stopped = event
@@ -89,14 +91,16 @@ class TimerTask(threading.Timer):
     def run(self):
         while not self.stopped.wait(self.interval):
             self.callback(*self.args, **self.kwargs)
-        logging.info("Timer {} exit".format(self.getName()))
+        self.stopped.clear()
+        logging.info("Timer thread: {:s} - exit".format(self.getName()))
 
 class BackgroundTask():
-    def __init__(self, ui, interval, idleTask):
+    def __init__(self, ui, name, interval, idleTask):
         self.stopFlag = threading.Event()
         self.idleTask = idleTask
         self.lock = threading.Lock()
         self.interval = interval
+        self.name = name
         # Add to timer thread rundown list in UI
         ui._rundown.append(self)
 
@@ -105,9 +109,9 @@ class BackgroundTask():
 
     def start(self, source):
         with self.lock:
-            self.thread = TimerTask(self.interval, self.queueIt, self.stopFlag)
+            self.thread = TimerTask(self.name, self.interval, self.queueIt, self.stopFlag)
             self.thread.start()
-            logging.info("Background task {} started".format(self.thread.getName()))
+            logging.info("Background task: {:s} - started".format(self.thread.getName()))
             return
 
     def cancel(self, source):
