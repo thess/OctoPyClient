@@ -1,10 +1,10 @@
 # Misc wrapper functions for Gtk object manipulation
+from attr import dataclass
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
-from attr import dataclass
 
 def imagePath(iname):
     return "./styles/images/" + iname
@@ -35,7 +35,7 @@ LABEL_IMAGE_SIZE = 20
 # a gtk.Label with a gtk.Image, the image is scaled at LABEL_IMAGE_SIZE.
 def LabelWithImage(img, label, *args):
     l = FmtLabel(label, args)
-    b = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+    b = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
     b.add(ImageFromFileWithSize(img, LABEL_IMAGE_SIZE, LABEL_IMAGE_SIZE))
     b.add(l)
 

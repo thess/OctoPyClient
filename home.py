@@ -19,5 +19,5 @@ class HomePanel(CommonPanel, metaclass=Singleton):
 
     def homeRequest(self, source, axes):
         logging.debug("Homing {} axes".format(axes))
-        self.ui.Printer.home(axes)
+        self.ui.printer.home(axes)
  

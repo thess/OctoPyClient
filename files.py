@@ -1,7 +1,7 @@
 import logging
-from attr import dataclass
 import time
 import humanize
+from attr import dataclass
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -47,7 +47,6 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         self.list.set_vexpand(True)
 
         sw = Gtk.ScrolledWindow()
-        # sw.set_property('overlay-scrolling', False)
         sw.add(self.list)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -87,14 +86,14 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         logging.info("Loading list of files from: {}".format(currentLoc(self.location)))
         files = []
         try:
-            folder = self.ui.Printer.files(location=currentLoc(self.location), recursive=False)
+            folder = self.ui.printer.files(location=currentLoc(self.location), recursive=False)
             if 'files' in folder:
                 files = folder['files']
             elif 'children' in folder:
                 if len(folder['children']) > 0:
                     files = folder['children']
-        except:
-            logging.exception("Retrieving files:")
+        except Exception as err:
+            logging.error("Retrieving files: {}".format(str(err)))
             return
 
         # Sort latest first
@@ -216,51 +215,28 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         self.doLoadFiles()
 
     def askPrintFile(self, source, file):
-        confirmDialog(self, "Send file to printer?\n\n<b>{:s}</b>"
+        utils.confirmDialog(self, "Send file to printer?\n\n<b>{:s}</b>"
                       .format(utils.strEllipsisLen(file['name'], 27)), doPrintFile, file)
 
     def askDeleteFile(self, source, file):
         msg = "Delete file?" if not utils.isFolder(file) else "Remove folder &amp; all its contents?"
-        confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
+        utils.confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
                       .format(msg, utils.strEllipsisLen(file['name'], 27)), doDeleteFile, file)
 
 def doPrintFile(panel, file):
     try:
         logging.info("Load and Print file: {:s}".format(file['path']))
-        panel.ui.Printer.select(file['path'], print=True)
-    except:
-        logging.exception("Print start request:")
+        panel.ui.printer.select(file['path'], print=True)
+    except Exception as err:
+        logging.error("Print start request: {}".format(str(err)))
 
 
 def doDeleteFile(panel, file):
     try:
         logging.info("RM {:s} FROM {:s}".format(file['path'], "local"))
-        panel.ui.Printer.delete(file['path'])
-    except:
-        logging.exception("Delete object:")
+        panel.ui.printer.delete(file['path'])
+    except Exception as err:
+        logging.error("Delete object: {}".format(str(err)))
     finally:
         # Re-display files list
         panel.doLoadFiles()
-
-
-def confirmDialog(panel, msg, cb, param):
-    dlg = Gtk.MessageDialog(parent=panel.ui.win,
-                            flags=Gtk.DialogFlags.MODAL,
-                            type=Gtk.MessageType.QUESTION,
-                            buttons=Gtk.ButtonsType.OK_CANCEL)
-    dlg.set_markup(msg)
-
-    box = dlg.get_content_area()
-    box.set_margin_start(15)
-    box.set_margin_end(15)
-    box.set_margin_top(15)
-    box.set_margin_bottom(15)
-
-    ctx = dlg.get_style_context()
-    ctx.add_class("dialog")
-    try:
-        if dlg.run() == Gtk.ResponseType.OK:
-            cb(panel, param)
-    finally:
-        dlg.destroy()
-

@@ -1,4 +1,4 @@
-/* Adapted from OctoScreen */
+/* Adapted from OctoPrint-TFT and OctoScreen */
 
 Window {
 	background-color: #13181C;
@@ -16,26 +16,6 @@ scrollbar slider {
 	min-width: 10px;
 	border-radius: 2px;
 	background-color: #404E57;
-}
-
-progress, trough {
-	min-height: 20px;
-	font-size: 50px;
-}
-
-progress {
-	background-color: #00C9B4;
-	font-size: 50px;
-	font-weight: lighter;
-}
-
-.printing-progress-bar{
-	font-size: 60px;
-	color: #00C9B4;
-}
-
-.printing-state {
-	opacity: 0.5;
 }
 
 button {
@@ -94,6 +74,7 @@ button.keyboard {
 .dialog {
 	border: 2px solid #333333;
 	font-size: 16px;
+	color: #000;
 	padding: 5px;
 	background-color: #FFF;
 }
@@ -132,11 +113,52 @@ button.keyboard {
 	background-color: rgba(204, 30, 30, 0.7);
 }
 
-.printing-status-label {
-	padding-top: 5px;
-	padding-bottom: 3px;
+@define-color progress_bg_color #37C8AB;
 
+#PrintProg {
+    color: #00C9B4;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    min-height: 40px;
+    min-width: 60px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+#ProgressInfo {
+    background-color: #000;
+}
+
+#NameLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#TimeLabel {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#TempLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+@define-color progress_bg_color #ff6c00;
+@define-color progress_bg_color1 #ffa666;
+
+
+progress, trough {
+	min-height: 18px;
+	border: 1px solid shade (@progress_bg_color, 0.9);
+	color: #000;
+}
+
+progress {
+	background-color: #00C9B4;
 	font-size: 18px;
+	font-weight: lighter;
 }
 
 .hidden {

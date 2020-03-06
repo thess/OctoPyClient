@@ -2,14 +2,12 @@
 import logging
 import threading
 
-from files import FilesPanel
-from print_status import PrintStatusPanel
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common import CommonPanel, BackgroundTask, Singleton
+from files import FilesPanel
 import igtk
 import menu
 
@@ -43,8 +41,8 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
                 self.bkgnd.lock.release()
 
     def showTools(self, ui):
-        self.extruder = Tool("Extruder", "extruder2.svg", ui.Printer)
-        self.bed = Tool("Bed", "bed2.svg", ui.Printer)
+        self.extruder = Tool("Extruder", "extruder2.svg", ui.printer)
+        self.bed = Tool("Bed", "bed2.svg", ui.printer)
 
         g = Gtk.Grid()
         g.set_row_homogeneous(True)
@@ -56,15 +54,18 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
 
     def updateTemperature(self):
         try:
-            printer_state = self.ui.Printer.printer()
-        except:
-            logging.exception("Getting printer state:")
+            printer_state = self.ui.printer.printer(exclude=['sd', 'state'])
+            if printer_state['temperature']:
+                self.bed.SetTemperatures(printer_state['temperature']['bed']['actual'],
+                                         printer_state['temperature']['bed']['target'])
+                self.extruder.SetTemperatures(printer_state['temperature']['tool0']['actual'],
+                                              printer_state['temperature']['tool0']['target'])
+            else:
+                self.bed.SetTemperatures(0, 0)
+                self.extruder.SetTemperatures(0, 0)
+        except Exception as err:
+            logging.error("Getting printer state: {}".format(str(err)))
             return
-
-        self.bed.SetTemperatures(printer_state['temperature']['bed']['actual'],
-                                 printer_state['temperature']['bed']['target'])
-        self.extruder.SetTemperatures(printer_state['temperature']['tool0']['actual'],
-                                      printer_state['temperature']['tool0']['target'])
 
 
 class Tool:
@@ -79,7 +80,6 @@ class Tool:
         self.image = image
         self.printer = printer
         self.isHeating = False
-        self.lock = threading.Lock()
         self.button = igtk.ButtonImageFromFile("", image, None)
         self.button.connect("clicked", self.clicked)
 
@@ -112,7 +112,12 @@ class Tool:
 
     def getProfileTemperature(self, source):
         temperature = 0
-        s = self.printer.settings()
+        try:
+            s = self.printer.settings()
+        except Exception as err:
+            logging.error(str(err))
+            return
+
         try:
             profs = s['temperature']['profiles']
             if s is not None and len(profs) > 0:
@@ -130,7 +135,7 @@ class Tool:
 
         if temperature == 0:
             if self.name == "Bed":
-                temperature = 55
+                temperature = 60
             else:
                 temperature = 210
 
