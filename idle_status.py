@@ -34,11 +34,7 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         self.ui.OpenPanel(FilesPanel(self.ui, self))
 
     def update(self):
-        if self.bkgnd.lock.acquire(False):
-            try:
-                self.updateTemperature()
-            finally:
-                self.bkgnd.lock.release()
+        self.updateTemperature()
 
     def showTools(self, ui):
         self.extruder = Tool("Extruder", "extruder2.svg", ui.printer)

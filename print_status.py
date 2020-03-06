@@ -127,12 +127,8 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
             self.updateTemperature()
 
     def update(self):
-        if self.bkgnd.lock.acquire(False):
-            try:
-                self.updateTemperature()
-                self.updateJob()
-            finally:
-                self.bkgnd.lock.release()
+        self.updateTemperature()
+        self.updateJob()
 
     def updateTemperature(self):
         try:
@@ -204,6 +200,10 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
             self.left.l.set_label("Printer is ready")
             self.finish.l.set_label("-")
             return
+        elif self.ui.pState == 'Cancelling':
+            self.left.l.set_label("Print job cancelling...")
+            self.finish.l.set_label("-")
+            return
 
         finish = "-"
         if int(job_completion) == 100:
@@ -221,8 +221,9 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
                 l = datetime.timedelta(d, s)
                 text += " / Left: {}".format(l)
 
-            f = datetime.datetime.fromtimestamp(int(time.time()) + ptl)
-            finish = "Finish time: {}".format(f.strftime("%H:%m %d-%b"))
+            now = time.time()
+            f = datetime.datetime.fromtimestamp(int(now + ptl))
+            finish = "Finish time: {}".format(f.strftime("%H:%M %d-%b"))
 
         self.left.l.set_label(text)
         self.finish.l.set_label(finish)

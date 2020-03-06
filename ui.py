@@ -40,6 +40,8 @@ class UI(Gtk.Window):
         self.connectionAttempts = 0
         self.UIState = None
         self.pState = None
+        # TODO: Add pop-up notifications
+        self.notify = None
         self.n = sdnotify.SystemdNotifier()
 
         self.sp = SplashPanel(self)
@@ -88,20 +90,15 @@ class UI(Gtk.Window):
         self.OpenPanel(self.current.parent)
 
     def update(self):
-        if self.bkgnd.lock.acquire(False):
-            try:
-                if self.connectionAttempts > 8:
-                    self.sp.putOnHold()
-                    return
-                elif self.UIState == "splash":
-                    self.connectionAttempts += 1
-                else:
-                    self.connectionAttempts = 0
+        if self.connectionAttempts > 8:
+            self.sp.putOnHold()
+            return
+        elif self.UIState == "splash":
+            self.connectionAttempts += 1
+        else:
+            self.connectionAttempts = 0
 
-                self.verifyConnection()
-            finally:
-                self.bkgnd.lock.release()
-
+        self.verifyConnection()
 
     def verifyConnection(self):
         self.n.notify("WATCHDOG=1")
@@ -113,7 +110,7 @@ class UI(Gtk.Window):
             self.pState = self.printer.state()
             if self.pState == 'Operational':
                 newUiState = "idle"
-            elif self.pState == "Printing" or self.pState == "Paused":
+            elif self.pState == "Printing" or self.pState == "Paused" or self.pState == "Cancelling":
                 newUiState = "printing"
             elif self.pState == "Error":
                 pass

@@ -72,9 +72,9 @@ class CommonPanel:
             if panel is not None:
                     color = "color{:d}".format((i % 4) + 1)
                     icon = "{:s}.svg".format(item['icon'])
-
+                    column, row = divmod(i, cols)
                     grid.attach(igtk.ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
-                                (i % cols) + 1, i / cols, 1, 1)
+                                row + 1, column, 1, 1)
 
     def addPanel(self, source, panel):
         self.ui.OpenPanel(panel)
@@ -107,6 +107,9 @@ class BackgroundTask():
         return GLib.idle_add(self.idleTask)
 
     def start(self, source):
+        # Invoke callback immediately. Timer queues callbacks after 1st interval
+        GLib.idle_add(self.idleTask)
+
         with self.lock:
             self.thread = TimerTask(self.name, self.interval, self.queueIt, self.stopFlag)
             self.thread.start()
