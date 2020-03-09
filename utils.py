@@ -40,6 +40,21 @@ def isFolder(file):
         return True
     else: return False
 
+def isOperational(state):
+    return state in ["Operational", "Transfering"]
+
+def isPrinting(state):
+    return state in ["Printing", "Starting", "Pausing", "Paused", "Resuming", "Cancelling"]
+
+def isOffline(state):
+    return state in ["Offline", "Closed"]
+
+def isError(state):
+    return state in ["Error", "Unknown"]
+
+def isConnecting(state):
+    return state in ["Opening", "Detecting", "Connecting"]
+
 def emptyContainer(list):
     ch = Gtk.Container.get_children(list)
     for widget in ch:

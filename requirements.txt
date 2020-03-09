@@ -1,5 +1,6 @@
-octorest>=0.3
 pygobject>=3.22.0
 humanize
 attr
 sdnotify
+urllib3
+requests

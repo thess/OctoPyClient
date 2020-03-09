@@ -166,7 +166,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
 
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         actions.add(self.createDeleteButton("delete.svg", f))
-        actions.add(self.createPrintButton("print.svg", f))
+        actions.add(self.createPrintButton("print2.svg", f))
         actions.set_halign(Gtk.Align.END)
 
         file = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -187,7 +187,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         b = igtk.ButtonImageWithSize("open.svg", self.Scaled(35), self.Scaled(35), self.openFolder, folder)
 
         ctx = b.get_style_context()
-        ctx.add_class("color1")
+        # ctx.add_class("color1")
         ctx.add_class("file-list")
 
         return b
@@ -196,7 +196,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         b = igtk.ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askPrintFile, file)
 
         ctx = b.get_style_context()
-        ctx.add_class("color3")
+        # ctx.add_class("color3")
         ctx.add_class("file-list")
 
         return b
@@ -205,7 +205,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         b = igtk.ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askDeleteFile, file)
 
         ctx = b.get_style_context()
-        ctx.add_class("color2")
+        # ctx.add_class("color2")
         ctx.add_class("file-list")
 
         return b

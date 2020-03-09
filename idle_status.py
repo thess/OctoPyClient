@@ -15,17 +15,16 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui, None)
         logging.debug("idleStatusPanel created")
-        self.panelH = 3
-        self.bkgnd = BackgroundTask(ui, 'temp_update', 2, self.update)
+        self.bkgnd = BackgroundTask(ui, 'temperature_update', 2, self.update)
         # Specify menu buttons
         menuItems = menu.getDefaultMenu()
         buttons = Gtk.Grid()
         buttons.set_row_homogeneous(True)
         buttons.set_column_homogeneous(True)
-        self.g.attach(buttons, 3, 0, 2, 2)
+        self.g.attach(buttons, 2, 0, 2, 2)
 
         self.arrangeMenuItems(buttons, menuItems, 2)
-        self.g.attach(igtk.ButtonImageStyle("Print", "print2.svg", "color2", self.showFiles), 3, 2, 2, 1)
+        self.g.attach(igtk.ButtonImageStyle("Print", "print2.svg", "color2", self.showFiles), 2, 2, 2, 1)
 
         self.showTools(self.ui)
         self.arrangeButtons()
@@ -43,9 +42,9 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         g = Gtk.Grid()
         g.set_row_homogeneous(True)
         g.set_column_homogeneous(True)
-        self.g.attach(g, 1, 0, 2, 3)
-        g.attach(self.extruder.button, 1, 0, 2, 1)
-        g.attach(self.bed.button, 1, 1, 2, 1)
+        self.g.attach(g, 0, 0, 2, 3)
+        g.attach(self.extruder.button, 0, 0, 2, 1)
+        g.attach(self.bed.button, 0, 1, 2, 1)
 
 
     def updateTemperature(self):
@@ -68,7 +67,6 @@ class Tool:
     isHeating:  bool
     name:       str
     button:     Gtk.Button
-    lock:       threading.Lock
     image:      str
 
     def __init__(self, name, image, printer):
@@ -102,7 +100,7 @@ class Tool:
         self.isHeating = heating
 
     def SetTemperatures(self, actual, target):
-        text = "{:.0f}°C / {:.0f}°C".format(actual, target)
+        text = "{:.0f}°C ⇒ {:.0f}°C".format(actual, target)
         self.button.set_label(text)
         self.updateStatus(target > 0)
 

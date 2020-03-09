@@ -13,9 +13,41 @@ from idle_status import idleStatusPanel
 from print_status import PrintStatusPanel
 import utils
 
+''' Test wapper for serializing OctoPrint API calls
+class OPClient():
+    opclient:   OctoRest
+
+    def __init__(self, url, key):
+        import threading
+        self.xlock = threading.Lock()
+        self.opclient = OctoRest(url=url, apikey=key)
+
+    def __getattr__(self, attr):
+        orig_attr = self.opclient.__getattribute__(attr)
+        if callable(orig_attr):
+            def hooked(*args, **kwargs):
+                result = None
+                try:
+                    if (self.xlock.acquire(False)):
+                        result = orig_attr(*args, **kwargs)
+                    else:
+                        logging.warning("OctoPrint overrun")
+                except Exception as err:
+                    logging.error(str(err))
+                    raise
+                finally:
+                    self.xlock.release()
+
+                return result
+            return hooked
+        else:
+            return orig_attr
+'''
+
 def make_client(url, key):
     try:
         client = OctoRest(url=url, apikey=key)
+        # client = OPClient(url, key)
         return client
     except Exception as err:
         logging.error(str(err))
@@ -45,7 +77,7 @@ class UI(Gtk.Window):
         self.n = sdnotify.SystemdNotifier()
 
         self.sp = SplashPanel(self)
-        self.bkgnd = BackgroundTask(self, 'status_check', 2, self.update)
+        self.bkgnd = BackgroundTask(self, 'state_check', 2, self.update)
 
         css_provider = Gtk.CssProvider()
         css_provider.load_from_path(style_sheet)
@@ -74,7 +106,7 @@ class UI(Gtk.Window):
 
         self.current = panel
         self.current.Show()
-        self.g.attach(self.current.g, 1, 0, 1, 1)
+        self.g.attach(self.current.g, 0, 0, 1, 1)
         self.g.show_all()
 
     def Quit(self, p):
@@ -91,10 +123,11 @@ class UI(Gtk.Window):
 
     def update(self):
         if self.connectionAttempts > 8:
-            self.sp.putOnHold()
             return
         elif self.UIState == "splash":
             self.connectionAttempts += 1
+            if self.connectionAttempts > 8:
+                self.sp.putOnHold()
         else:
             self.connectionAttempts = 0
 
@@ -108,20 +141,21 @@ class UI(Gtk.Window):
 
         try:
             self.pState = self.printer.state()
-            if self.pState == 'Operational':
+            if utils.isOperational(self.pState):
                 newUiState = "idle"
-            elif self.pState == "Printing" or self.pState == "Paused" or self.pState == "Cancelling":
+            elif utils.isPrinting(self.pState):
                 newUiState = "printing"
-            elif self.pState == "Error":
+            elif utils.isError(self.pState):
                 pass
-            elif self.pState == "Closed":
+            elif utils.isOffline(self.pState):
                 logging.info("Attempting to connect")
                 self.printer.connect()
                 newUiState = "splash"
                 splashMessage = "Startup..."
-            elif self.pState == "Connecting":
+            elif utils.isConnecting(self.pState):
                     splashMessage = self.pState + "..."
         except Exception as err:
+            # After 10sec - display reason
             if (time.time() - self.now) > 10:
                 splashMessage = utils.errToUser(err)
 
@@ -139,7 +173,7 @@ class UI(Gtk.Window):
                     self.OpenPanel(idleStatusPanel(self))
             elif newUiState == "printing":
                     logging.info("Printing a job")
-                    self.OpenPanel(PrintStatusPanel(self, self))
+                    self.OpenPanel(PrintStatusPanel(self))
             elif newUiState == "splash":
                 self.OpenPanel(self.sp)
         finally:

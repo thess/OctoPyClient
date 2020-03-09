@@ -24,8 +24,9 @@ class CommonPanel:
     def __init__(self, ui, parent):
         self.ui = ui
         self.parent = parent
+        # Default panel layout 4x3
         self.panelW = 4
-        self.panelH = 2
+        self.panelH = 3
         self.buttons = []
         self.bkgnd = None
 
@@ -49,7 +50,7 @@ class CommonPanel:
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
         y = int(len(self.buttons) / self.panelW)
-        self.g.attach(btn, x+1, y, 1, 1)
+        self.g.attach(btn, x, y, 1, 1)
         self.buttons.append(btn)
 
     def Show(self):
@@ -72,9 +73,9 @@ class CommonPanel:
             if panel is not None:
                     color = "color{:d}".format((i % 4) + 1)
                     icon = "{:s}.svg".format(item['icon'])
-                    column, row = divmod(i, cols)
+                    row, column = divmod(i, cols)
                     grid.attach(igtk.ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
-                                row + 1, column, 1, 1)
+                                column, row, 1, 1)
 
     def addPanel(self, source, panel):
         self.ui.OpenPanel(panel)

@@ -6,6 +6,7 @@ class HomePanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, parent):
         CommonPanel.__init__(self, ui, parent)
         logging.debug("HomePanel created")
+        self.panelH = 2
 
         self.addButton(self.createMoveButton("Home All", "home.svg", {"x", "y", "z"}))
         self.addButton(self.createMoveButton("Home X", "home-x.svg", "x"))

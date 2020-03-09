@@ -1,5 +1,4 @@
 import logging
-import threading
 import time
 import datetime
 
@@ -8,6 +7,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common import CommonPanel, Singleton, BackgroundTask
+from idle_status import idleStatusPanel
 import igtk
 import utils
 
@@ -16,56 +16,43 @@ DAY_SECONDS = 24 * 3600
 class PrintStatusPanel(CommonPanel, metaclass=Singleton):
     pb: Gtk.ProgressBar
 
-    def __init__(self, ui, parent):
-        CommonPanel.__init__(self, ui, parent)
+    def __init__(self, ui):
+        CommonPanel.__init__(self, ui, None)
         logging.debug("PrintStatusPanel created")
+
         self.bkgnd = BackgroundTask(ui, "print_status", 1, self.update)
 
-        self.g.attach(self.createMainBox(), 1, 0, 4, 2)
-        self.arrangeButtons(False)
+        self.g.attach(self.createInfoBox(), 1, 0, 3, 1)
+        self.g.attach(self.createProgressBar(), 1, 1, 3, 1)
+        self.g.attach(self.createPauseButton(), 1, 2, 1, 1)
+        self.g.attach(self.createStopButton(), 2, 2, 1, 1)
+        self.g.attach(self.createMenuButton(), 3, 2, 1, 1)
+        self.g.attach(self.createCompleteButton(), 1, 2, 3, 1)
 
-        self.taskRunning = threading.Lock()
+        self.showTools()
+
+        self.arrangeButtons(False)
         self.printerStatus = 0
+
 
     def createProgressBar(self):
         self.pb = Gtk.ProgressBar()
         self.pb.set_show_text(True)
+        self.pb.set_margin_top(10)
+        self.pb.set_margin_left(10)
+        self.pb.set_margin_end(self.Scaled(10))
+        self.pb.set_valign(Gtk.Align.CENTER)
+        self.pb.set_vexpand(True)
         self.pb.set_name("PrintProg")
+
         return self.pb
 
-    def createMainBox(self):
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        box.set_valign(Gtk.Align.START)
-        box.set_vexpand(True)
+    def showTools(self):
+        self.bed = self.createToolButton("bed2.svg")
+        self.tool0 = self.createToolButton("extruder2.svg")
 
-        grid = Gtk.Grid()
-        grid.set_hexpand(True)
-        grid.add(self.createInfoBox())
-        grid.set_valign(Gtk.Align.START)
-        grid.set_margin_top(20)
-
-        box.add(grid)
-
-        pb_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        pb_box.set_vexpand(True)
-        pb_box.set_hexpand(True)
-        pb_box.add(self.createProgressBar())
-
-        box.add(pb_box)
-
-        btn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        btn.set_halign(Gtk.Align.END)
-        btn.set_valign(Gtk.Align.END)
-        btn.set_vexpand(True)
-        btn.set_margin_top(0)
-        btn.set_margin_end(0)
-        btn.add(self.createPrintButton())
-        btn.add(self.createPauseButton())
-        btn.add(self.createStopButton())
-        btn.add(igtk.ButtonImageWithSize("back.svg", self.Scaled(60), self.Scaled(60), self.ui.navHistory))
-
-        box.add(btn)
-        return box
+        self.g.attach(self.tool0, 0, 0, 1, 1)
+        self.g.attach(self.bed, 0, 1, 1, 1)
 
     def createInfoBox(self):
         self.file = igtk.LabelWithImage("file2.svg", "")
@@ -74,27 +61,28 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.left.l.set_name("TimeLabel")
         self.finish = igtk.LabelWithImage("finish.svg", "")
         self.finish.l.set_name("TimeLabel")
-        self.bed = igtk.LabelWithImage("bed2.svg", "")
-        self.bed.l.set_name("TempLabel")
-        self.tool0 = igtk.LabelWithImage("extruder2.svg", "")
-        self.tool0.l.set_name("TempLabel")
 
         info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         info.set_halign(Gtk.Align.START)
         info.set_hexpand(True)
-        info.set_margin_start(20)
+        info.set_vexpand(True)
+        info.set_valign(Gtk.Align.CENTER)
+        info.set_margin_left(10)
+        info.set_margin_top(10)
 
         info.add(self.file.b)
         info.add(self.left.b)
         info.add(self.finish.b)
-        info.add(self.tool0.b)
-        info.add(self.bed.b)
 
         return info
 
-    def createPrintButton(self):
-        self.print = igtk.ButtonImageWithSize("print2.svg", self.Scaled(60), self.Scaled(60), self.doPrint)
-        return self.print
+    def createCompleteButton(self):
+        self.complete = igtk.ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.openIdleStatus)
+        return self.complete
+
+    def createMenuButton(self):
+        self.menu = igtk.ButtonImageWithSize("control2.svg", self.Scaled(60), self.Scaled(60), self.openPrintMenu)
+        return self.menu
 
     def createPauseButton(self):
         self.pause = igtk.ButtonImageWithSize("pause2.svg", self.Scaled(60), self.Scaled(60), self.doPause)
@@ -104,15 +92,23 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.stop = igtk.ButtonImageWithSize("stop2.svg", self.Scaled(60), self.Scaled(60), self.doStop)
         return self.stop
 
-    def doPrint(self, source):
-        try:
-            logging.warning("Starting new print job")
-            self.ui.printer.start()
-        except Exception as err:
-            logging.error(str(err))
-        finally:
-            self.updateTemperature()
+    def createToolButton(self, img):
+        b = igtk.ButtonImageFromFile("", img, None)
+        ctx = b.get_style_context()
+        ctx.add_class("printing-state")
+        return b
 
+    def createBedButton(self):
+        b = igtk.ButtonImage("", "bed2.svg", None)
+        ctx = b.get_style_context()
+        ctx.add_class("printing-state")
+        return b
+
+    def openPrintMenu(self, source):
+        pass
+
+    def openIdleStatus(self):
+        self.ui.add(idleStatusPanel(self.ui))
 
     def doStop(self, source):
             confirmStopDialog(self, self.ui.printer)
@@ -142,36 +138,44 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         if printer_state['temperature']:
             text ="{:.0f}°C ⇒ {:.0f}°C ".format(printer_state['temperature']['bed']['actual'],
                                                 printer_state['temperature']['bed']['target'])
-            self.bed.l.set_label(text)
+            self.bed.set_label(text)
             text ="{:.0f}°C ⇒ {:.0f}°C ".format(printer_state['temperature']['tool0']['actual'],
                                                 printer_state['temperature']['tool0']['target'])
-            self.tool0.l.set_label(text)
+            self.tool0.set_label(text)
 
     def updateState(self, printer_state):
-        status = int(printer_state['state']['flags']['printing']) * 4\
-                 + int(printer_state['state']['flags']['paused']) * 2\
-                 + int(printer_state['state']['flags']['ready'])
+        status = printer_state['state']['flags']
         if status != self.printerStatus:
             self.printerStatus = status
-            if status == 4: # Printing
-                self.print.set_sensitive(False)
+            if status['printing']:
+                self.menu.set_sensitive(True)
                 self.pause.set_image(igtk.ImageFromFileWithSize("pause2.svg", self.Scaled(60), self.Scaled(60)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
+                self.pause.show()
+                self.stop.show()
+                self.menu.show()
+                self.complete.hide()
                 return
-            elif status & 2: # Paused/Ready
-                self.print.set_sensitive(False)
-                self.pause.set_image(igtk.ImageFromFileWithSize("resume.svg", self.Scaled(60), self.Scaled(60)))
+            elif status['paused']:
+                self.menu.set_sensitive(True)
+                self.pause.set_image(igtk.ImageFromFileWithSize("resume2.svg", self.Scaled(60), self.Scaled(60)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
+                self.pause.show()
+                self.stop.show()
+                self.menu.show()
+                self.complete.hide()
                 return
-            elif status == 1: # Ready
-                self.print.set_sensitive(True)
+            elif status['ready']:
                 self.pause.set_sensitive(False)
                 self.stop.set_sensitive(False)
+                self.menu.hide()
+                self.pause.hide()
+                self.stop.hide()
+                self.complete.show()
                 return
             else:
-                self.print.set_sensitive(False)
                 self.pause.set_sensitive(False)
                 self.stop.set_sensitive(False)
                 return
@@ -209,8 +213,8 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         if int(job_completion) == 100:
             d, s = divmod(int(job_state['job']['lastPrintTime']), DAY_SECONDS)
             text = "Completed in {}".format(datetime.timedelta(d, s))
-        elif job_completion == 0:
-            text = "Warming up ..."
+        elif int(job_completion) == 0:
+            text = "Pausing or Warming up ..."
         else:
             d, s = divmod(int(job_state['progress']['printTime']), DAY_SECONDS)
             elapsed = datetime.timedelta(d, s)

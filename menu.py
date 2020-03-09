@@ -14,10 +14,9 @@ from filament import FilamentPanel
 class MenuPanel(CommonPanel):
     def __init__(self, ui, parent, items):
         CommonPanel.__init__(self, ui, parent)
-        self.items = items
         self.panelH = int(1 + len(items) / 4)
 
-        self.arrangeMenuItems(self.g, self.items, 4)
+        self.arrangeMenuItems(self.g, items, 4)
         self.arrangeButtons()
 
 def getPanel(ui, parent, item):
