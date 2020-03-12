@@ -1,6 +1,5 @@
 # Printer is idle - show status
-import logging
-import threading
+from utils import *
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -14,7 +13,7 @@ import menu
 class idleStatusPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui, None)
-        logging.debug("idleStatusPanel created")
+        log.debug("idleStatusPanel created")
         self.bkgnd = BackgroundTask(ui, 'temperature_update', 2, self.update)
         # Specify menu buttons
         menuItems = menu.getDefaultMenu()
@@ -59,7 +58,10 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
                 self.bed.SetTemperatures(0, 0)
                 self.extruder.SetTemperatures(0, 0)
         except Exception as err:
-            logging.error("Getting printer state: {}".format(str(err)))
+            if isRemoteDisconnect(err):
+                log.debug("Ignoring remote disconnect")
+                return
+            log.error("Getting printer state: {}".format(str(err)))
             return
 
 
@@ -109,7 +111,7 @@ class Tool:
         try:
             s = self.printer.settings()
         except Exception as err:
-            logging.error(str(err))
+            log.error(str(err))
             return
 
         try:
@@ -125,7 +127,7 @@ class Tool:
                             break
 
         except Exception as e:
-            logging.warning("Printer profile key {} not found ".format(str(e)))
+            log.warning("Printer profile key {} not found ".format(str(e)))
 
         if temperature == 0:
             if self.name == "Bed":

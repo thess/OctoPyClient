@@ -1,4 +1,6 @@
-import logging
+# Show local files, navigate folders.
+# Options to delete files/folders and start print jobs
+
 import time
 import humanize
 from attr import dataclass
@@ -9,7 +11,7 @@ from gi.repository import Gtk
 
 from common import CommonPanel, Singleton
 import igtk
-import utils
+from utils import *
 
 @dataclass
 class locationHistory:
@@ -40,7 +42,7 @@ def byDate(item):
 class FilesPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, parent):
         CommonPanel.__init__(self, ui, parent)
-        logging.debug("FilesPanel created")
+        log.debug("FilesPanel created")
 
         self.location = locationHistory(['local'])
         self.list = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -83,7 +85,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
             self.doLoadFiles()
 
     def doLoadFiles(self, source=None):
-        logging.info("Loading list of files from: {}".format(currentLoc(self.location)))
+        log.info("Loading list of files from: {}".format(currentLoc(self.location)))
         files = []
         try:
             folder = self.ui.printer.files(location=currentLoc(self.location), recursive=False)
@@ -93,20 +95,20 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
                 if len(folder['children']) > 0:
                     files = folder['children']
         except Exception as err:
-            logging.error("Retrieving files: {}".format(str(err)))
+            log.error("Retrieving files: {}".format(str(err)))
             return
 
         # Sort latest first
         files.sort(key=byDate, reverse=True)
         # Remove previous list items from container
-        utils.emptyContainer(self.list)
+        emptyContainer(self.list)
         # Folders first
         for f in files:
-            if utils.isFolder(f):
+            if isFolder(f):
                 self.addFolder(self.list, f)
 
         for f in files:
-            if not utils.isFolder(f):
+            if not isFolder(f):
                 self.addFile(self.list, f)
 
         self.list.show_all()
@@ -115,7 +117,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         frame = Gtk.Frame()
 
         name = Gtk.Label(f['name'])
-        name.set_markup("<big>{:s}</big>".format(utils.strEllipsis(f['name'])))
+        name.set_markup("<big>{:s}</big>".format(strEllipsis(f['name'])))
         name.set_hexpand(True)
         name.set_halign(Gtk.Align.START)
         name.set_margin_top(15)
@@ -151,7 +153,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         frame = Gtk.Frame()
 
         name = Gtk.Label(f['name'])
-        name.set_markup("<small>{:s}</small>".format(utils.strEllipsis(f['name'])))
+        name.set_markup("<small>{:s}</small>".format(strEllipsis(f['name'])))
         name.set_hexpand(True)
         name.set_halign(Gtk.Align.START)
         name.set_margin_top(5)
@@ -215,28 +217,28 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         self.doLoadFiles()
 
     def askPrintFile(self, source, file):
-        utils.confirmDialog(self, "Send file to printer?\n\n<b>{:s}</b>"
-                      .format(utils.strEllipsisLen(file['name'], 27)), doPrintFile, file)
+        confirmDialog(self, "Send file to printer?\n\n<b>{:s}</b>"
+                      .format(strEllipsisLen(file['name'], 27)), doPrintFile, file)
 
     def askDeleteFile(self, source, file):
-        msg = "Delete file?" if not utils.isFolder(file) else "Remove folder &amp; all its contents?"
-        utils.confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
-                      .format(msg, utils.strEllipsisLen(file['name'], 27)), doDeleteFile, file)
+        msg = "Delete file?" if not isFolder(file) else "Remove folder &amp; all its contents?"
+        confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
+                      .format(msg, strEllipsisLen(file['name'], 27)), doDeleteFile, file)
 
 def doPrintFile(panel, file):
     try:
-        logging.info("Load and Print file: {:s}".format(file['path']))
+        log.info("Load and Print file: {:s}".format(file['path']))
         panel.ui.printer.select(file['path'], print=True)
     except Exception as err:
-        logging.error("Print start request: {}".format(str(err)))
+        log.error("Print start request: {}".format(str(err)))
 
 
 def doDeleteFile(panel, file):
     try:
-        logging.info("RM {:s} FROM {:s}".format(file['path'], "local"))
+        log.info("RM {:s} FROM {:s}".format(file['path'], "local"))
         panel.ui.printer.delete(file['path'])
     except Exception as err:
-        logging.error("Delete object: {}".format(str(err)))
+        log.error("Delete object: {}".format(str(err)))
     finally:
         # Re-display files list
         panel.doLoadFiles()

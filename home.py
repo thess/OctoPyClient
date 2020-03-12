@@ -1,11 +1,11 @@
-import logging
+from utils import *
 from common import CommonPanel, Singleton
 import igtk
 
 class HomePanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, parent):
         CommonPanel.__init__(self, ui, parent)
-        logging.debug("HomePanel created")
+        log.debug("HomePanel created")
         self.panelH = 2
 
         self.addButton(self.createMoveButton("Home All", "home.svg", {"x", "y", "z"}))
@@ -19,6 +19,6 @@ class HomePanel(CommonPanel, metaclass=Singleton):
         return igtk.ButtonImageStyle(label, image, "color2", self.homeRequest, axes)
 
     def homeRequest(self, source, axes):
-        logging.debug("Homing {} axes".format(axes))
+        log.debug("Homing {} axes".format(axes))
         self.ui.printer.home(axes)
  

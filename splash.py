@@ -6,7 +6,6 @@ from gi.repository import Gtk
 
 from common import CommonPanel
 from system import SystemPanel
-from network import NetworkPanel
 import igtk
 
 
@@ -51,10 +50,6 @@ class SplashPanel(CommonPanel):
         sys.set_property("width-request", self.Scaled(80))
         bar.add(sys)
 
-        net = igtk.ButtonImageStyle("Network", "network.svg", "color4", self.showNetwork)
-        net.set_property("width-request", self.Scaled(80))
-        bar.add(net)
-
         return bar
 
     def putOnHold(self):
@@ -70,8 +65,5 @@ class SplashPanel(CommonPanel):
         self.label.set_text("Startup...")
         self.ui.connectionAttempts = 0
 
-    def showSystem(self):
+    def showSystem(self, source):
         self.ui.OpenPanel(SystemPanel(self.ui, self))
-
-    def showNetwork(self):
-        self.ui.OpenPanel(NetworkPanel(self.ui, self))

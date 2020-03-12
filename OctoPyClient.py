@@ -26,7 +26,6 @@ from gi.repository import Gtk
 
 from ui import UI
 
-
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
@@ -77,16 +76,14 @@ def main(argv=None):
             raise Usage("Octoprint API key required")
 
         try:
-            if logfile:
-                logging.basicConfig(level=loglevel, stream=sys.stdout,
-                                format='%(asctime)s.%(msecs)03d  OctoPyClient'
-                                        '%(levelname)8s %(filename)s:%(lineno)d - %(message)s',
-                                datefmt='%H:%M:%S')
+            logfmt = '%(asctime)s.%(msecs)03d  OctoPyClient%(levelname)8s %(filename)s:%(lineno)d - %(message)s'
+            logtime = '%H:%M:%S'
+            if not logfile:
+                logging.basicConfig(level=logging.WARNING, stream=sys.stdout, format=logfmt, datefmt=logtime)
             else:
-                logging.basicConfig(level=loglevel, filename=logfile, filemode='w',
-                                    format='%(asctime)s.%(msecs)03d  OctoPyClient'
-                                           '%(levelname)8s %(filename)s:%(lineno)d - %(message)s',
-                                    datefmt='%H:%M:%S')
+                logging.basicConfig(level=logging.WARNING, filename=logfile, filemode='w', format=logfmt, datefmt=logtime)
+            # Custom global logger - set level
+            logging.getLogger('OctoPyClient').setLevel(loglevel)
 
             Gtk.init()
             settings = Gtk.Settings.get_default()

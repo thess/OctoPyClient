@@ -1,8 +1,8 @@
-import logging
+from utils import *
 from common import CommonPanel, Singleton
 import igtk
 
 class FanPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, parent):
         CommonPanel.__init__(self, ui, parent)
-        logging.debug("FanPanel created")
+        log.debug("FanPanel created")

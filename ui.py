@@ -1,6 +1,6 @@
 import time
 import sdnotify
-import logging
+from utils import *
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -11,7 +11,6 @@ from splash import SplashPanel
 from common import BackgroundTask
 from idle_status import idleStatusPanel
 from print_status import PrintStatusPanel
-import utils
 
 ''' Test wapper for serializing OctoPrint API calls
 class OPClient():
@@ -31,9 +30,9 @@ class OPClient():
                     if (self.xlock.acquire(False)):
                         result = orig_attr(*args, **kwargs)
                     else:
-                        logging.warning("OctoPrint overrun")
+                        log.warning("OctoPrint overrun")
                 except Exception as err:
-                    logging.error(str(err))
+                    log.error(str(err))
                     raise
                 finally:
                     self.xlock.release()
@@ -48,9 +47,11 @@ def make_client(url, key):
     try:
         client = OctoRest(url=url, apikey=key)
         # client = OPClient(url, key)
-        return client
+        return client, None
     except Exception as err:
-        logging.error(str(err))
+        msg = errToUser(err)
+        log.error(msg)
+        return None, msg
 
 def get_version(client):
     message = "You are using OctoPrint v" + client.version['server']
@@ -68,7 +69,7 @@ class UI(Gtk.Window):
         self.scalef = 1.0
         self.current = None
         self.now = int(time.time())
-        self.printer = make_client(host, key)
+        self.printer = None
         self.connectionAttempts = 0
         self.UIState = None
         self.pState = None
@@ -139,28 +140,34 @@ class UI(Gtk.Window):
         newUiState = "splash"
         splashMessage = "Initializing..."
 
-        try:
-            self.pState = self.printer.state()
-            if utils.isOperational(self.pState):
-                newUiState = "idle"
-            elif utils.isPrinting(self.pState):
-                newUiState = "printing"
-            elif utils.isError(self.pState):
-                pass
-            elif utils.isOffline(self.pState):
-                logging.info("Attempting to connect")
-                self.printer.connect()
-                newUiState = "splash"
-                splashMessage = "Startup..."
-            elif utils.isConnecting(self.pState):
-                    splashMessage = self.pState + "..."
-        except Exception as err:
-            # After 10sec - display reason
-            if (time.time() - self.now) > 10:
-                splashMessage = utils.errToUser(err)
+        if self.printer is None:
+            self.printer, errMsg = make_client(self.host, self.key)
 
-            newUiState = "splash"
-            logging.error("Unexpected error: {}".format(str(err)))
+        if self.printer is not None:
+            try:
+                self.pState = self.printer.state()
+                if isOperational(self.pState):
+                    newUiState = "idle"
+                elif isPrinting(self.pState):
+                    newUiState = "printing"
+                elif isError(self.pState):
+                    pass
+                elif isOffline(self.pState):
+                    log.info("Attempting to connect")
+                    self.printer.connect()
+                    newUiState = "splash"
+                    splashMessage = "Startup..."
+                elif isConnecting(self.pState):
+                        splashMessage = self.pState + "..."
+            except Exception as err:
+                # After 10sec - display reason
+                if (int(time.time()) - self.now) > 10:
+                    splashMessage = errToUser(err)
+                    newUiState = "splash"
+                if not isRemoteDisconnect(err):
+                    log.error("Getting printer state: {}".format(str(err)))
+        else:
+            splashMessage = errMsg
 
         self.sp.label.set_text(splashMessage)
 
@@ -169,12 +176,13 @@ class UI(Gtk.Window):
 
         try:
             if newUiState == "idle":
-                    logging.info("Printer is ready")
+                    log.info("Printer is ready")
                     self.OpenPanel(idleStatusPanel(self))
             elif newUiState == "printing":
-                    logging.info("Printing a job")
+                    log.info("Printing a job")
                     self.OpenPanel(PrintStatusPanel(self))
             elif newUiState == "splash":
+                self.now = int(time.time())
                 self.OpenPanel(self.sp)
         finally:
             self.UIState = newUiState

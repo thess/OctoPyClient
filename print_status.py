@@ -1,4 +1,5 @@
-import logging
+# Show print job status with real-time updates
+
 import time
 import datetime
 
@@ -9,7 +10,7 @@ from gi.repository import Gtk
 from common import CommonPanel, Singleton, BackgroundTask
 from idle_status import idleStatusPanel
 import igtk
-import utils
+from utils import *
 
 DAY_SECONDS = 24 * 3600
 
@@ -18,7 +19,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
 
     def __init__(self, ui):
         CommonPanel.__init__(self, ui, None)
-        logging.debug("PrintStatusPanel created")
+        log.debug("PrintStatusPanel created")
 
         self.bkgnd = BackgroundTask(ui, "print_status", 1, self.update)
 
@@ -107,7 +108,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
     def openPrintMenu(self, source):
         pass
 
-    def openIdleStatus(self):
+    def openIdleStatus(self, source):
         self.ui.add(idleStatusPanel(self.ui))
 
     def doStop(self, source):
@@ -115,10 +116,10 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
 
     def doPause(self, source):
         try:
-            logging.warning("Pausing/Resuming job")
+            log.warning("Pausing/Resuming job")
             self.ui.printer.toggle()
         except Exception as err:
-            logging.error(str(err))
+            log.error(str(err))
         finally:
             self.updateTemperature()
 
@@ -130,7 +131,10 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         try:
             printer_state = self.ui.printer.printer(exclude=['sd'])
         except Exception as err:
-            logging.error(str(err))
+            if isRemoteDisconnect(err):
+                log.debug("Ignoring remote disconnect")
+                return
+            log.error("Getting printer state: {}".format(str(err)))
             return
 
         self.updateState(printer_state)
@@ -184,12 +188,15 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         try:
             job_state = self.ui.printer.job_info()
         except Exception as err:
-            logging.error(str(err))
+            if isRemoteDisconnect(err):
+                log.debug("Ignoring remote disconnect")
+                return
+            log.error("Getting job info: {}".format(str(err)))
             return
 
         file = job_state['job']['file']['name']
         if file:
-            file = utils.filenameEllipsis(file)
+            file = filenameEllipsis(file)
         else:
             file = "<i>File not set</i>"
 
@@ -208,13 +215,17 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
             self.left.l.set_label("Print job cancelling...")
             self.finish.l.set_label("-")
             return
+        elif self.ui.pState == 'Pausing':
+            self.left.l.set_label("Print job pausing...")
+            self.finish.l.set_label("-")
+            return
 
         finish = "-"
         if int(job_completion) == 100:
             d, s = divmod(int(job_state['job']['lastPrintTime']), DAY_SECONDS)
             text = "Completed in {}".format(datetime.timedelta(d, s))
         elif int(job_completion) == 0:
-            text = "Pausing or Warming up ..."
+            text = "Warming up ..."
         else:
             d, s = divmod(int(job_state['progress']['printTime']), DAY_SECONDS)
             elapsed = datetime.timedelta(d, s)
@@ -249,9 +260,9 @@ def confirmStopDialog(panel, printer):
     ctx.add_class("dialog")
     try:
         if dlg.run() == Gtk.ResponseType.YES:
-            logging.warning("Stopping current job")
+            log.warning("Stopping current job")
             printer.cancel()
     except Exception as err:
-        logging.error(str(err))
+        log.error(str(err))
     finally:
         dlg.destroy()

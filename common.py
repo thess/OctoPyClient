@@ -1,12 +1,12 @@
 import math
 import threading
-import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
+from utils import *
 import igtk
 
 class Singleton(type):
@@ -44,8 +44,7 @@ class CommonPanel:
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
         if bAddBack:
-            self.back = igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory)
-            self.addButton(self.back)
+            self.addButton(igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory))
 
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
@@ -92,7 +91,7 @@ class TimerTask(threading.Timer):
         while not self.stopped.wait(self.interval):
             self.callback(*self.args, **self.kwargs)
         self.stopped.clear()
-        logging.info("Timer thread: {:s} - exit".format(self.getName()))
+        log.info("Timer thread: {:s} - exit".format(self.getName()))
 
 class BackgroundTask():
     def __init__(self, ui, name, interval, idleTask):
@@ -114,7 +113,7 @@ class BackgroundTask():
         with self.lock:
             self.thread = TimerTask(self.name, self.interval, self.queueIt, self.stopFlag)
             self.thread.start()
-            logging.info("Background task: {:s} - started".format(self.thread.getName()))
+            log.info("Background task: {:s} - started".format(self.thread.getName()))
             return
 
     def cancel(self, source):

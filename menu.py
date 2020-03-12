@@ -7,7 +7,6 @@ from extrude import ExtrudePanel
 from control import ControlPanel
 from fan import FanPanel
 from system import SystemPanel
-from network import NetworkPanel
 from temperature import TemperaturePanel
 from filament import FilamentPanel
 
@@ -39,8 +38,6 @@ def getPanel(ui, parent, item):
         return FilamentPanel(ui, parent)
     elif pname == "system":
         return SystemPanel(ui, parent)
-    elif pname == "network":
-        return NetworkPanel(ui, parent)
 
 
     return None
@@ -54,11 +51,7 @@ DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                      {'name': 'Control', 'icon': 'control', 'panel': 'control'}]
                  },
                 {'name': 'Filament', 'icon': 'filament2', 'panel': 'filament'},
-                {'name': 'Configuration', 'icon': 'control2', 'panel': 'menu', 'items':
-                    [{'name': 'Network', 'icon': 'network', 'panel': 'network'},
-                     {'name': 'System', 'icon': 'info', 'panel': 'system'}]
-                 }
-                ]
+                {'name': 'Configuration', 'icon': 'control2', 'panel': 'system'}]
 
 def getDefaultMenu():
     return DEFAULT_MENU

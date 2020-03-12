@@ -4,16 +4,33 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+# Global logger defintion use: 'from utils import log'
+# This allows us to have log levels independent of other libraries
+# Logger and level initialized in main startup
+import logging
+
+log = logging.getLogger('OctoPyClient')
+
 def errToUser(err):
     text = str(err)
-    if "connection refused" in text:
-        return "Unable to connect to Octoprint - is it running?"
-    elif "request canceled" in text:
+    if "Connection refused" in text:
+        return "Unable to connect to OctoPrint - is it running?"
+    elif "Name or service not known" in text:
+        return "OctoPrint server not found - check address"
+    elif "Forbidden" in text:
+        return "OctoPrint login refused - check API key"
+    elif "Connection aborted" in text:
         return "Starting..."
-    elif "connection broken" in text:
+    elif "Request canceled" in text:
         return "Starting..."
 
     return "Unexpected error: {}".format(str(err))
+
+def isRemoteDisconnect(err):
+    if (type(err).__name__ == 'ConnectionError') \
+            and (type(err.args[0].args[1]).__name__ == 'RemoteDisconnected'):
+        return True
+    return False
 
 def strEllipsisLen(name, length):
     l = len(name)
@@ -30,6 +47,10 @@ def strEllipsis(name):
     return name
 
 def filenameEllipsis(name):
+    idx = name.rfind(".gco")
+    if idx > 0:
+        name = name[:idx]
+
     if len(name) > 35:
         return name[:32] + "..."
 
