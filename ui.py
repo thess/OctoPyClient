@@ -45,7 +45,10 @@ class OPClient():
 
 def make_client(url, key):
     try:
-        client = OctoRest(url=url, apikey=key)
+        import requests
+        sess = requests.Session()
+        sess.keep_alive = False
+        client = OctoRest(url=url, apikey=key, session=sess)
         # client = OPClient(url, key)
         return client, None
     except Exception as err:
