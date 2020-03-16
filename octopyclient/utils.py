@@ -1,4 +1,5 @@
 # Utility functions for OctoPyClient
+import os
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -11,7 +12,19 @@ import logging
 
 log = logging.getLogger('OctoPyClient')
 
+_stylesheet_base = os.path.realpath(os.path.dirname(__file__))
+
+def setStyleBase(path):
+    _stylesheet_base = path
+
+def getStylePath(target):
+    return os.path.join(_stylesheet_base, "styles", target)
+
+def imagePath(iname):
+    return os.path.join(_stylesheet_base, "styles/images", iname)
+
 def errToUser(err):
+    starting = ["Request canceled", "Connection aborted", "(404)"]
     text = str(err)
     if "Connection refused" in text:
         return "Unable to connect to OctoPrint - is it running?"
@@ -19,17 +32,19 @@ def errToUser(err):
         return "OctoPrint server not found - check address"
     elif "Forbidden" in text:
         return "OctoPrint login refused - check API key"
-    elif "Connection aborted" in text:
-        return "Starting..."
-    elif "Request canceled" in text:
-        return "Starting..."
+    elif any(ss in text for ss in starting):
+        return "Service starting..."
 
     return "Unexpected error: {}".format(str(err))
 
 def isRemoteDisconnect(err):
-    if (type(err).__name__ == 'ConnectionError') \
-            and (type(err.args[0].args[1]).__name__ == 'RemoteDisconnected'):
-        return True
+    if type(err).__name__ == 'ConnectionError':
+        try:
+            if type(err.args[0].args[1]).__name__ == 'RemoteDisconnected':
+                return True
+        except IndexError:
+            # No subtype - must be other error
+            pass
     return False
 
 def strEllipsisLen(name, length):

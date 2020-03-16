@@ -1,14 +1,14 @@
 # Printer is idle - show status
-from utils import *
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from common import CommonPanel, BackgroundTask, Singleton
-from files import FilesPanel
-import igtk
-import menu
+from octopyclient.common import CommonPanel, BackgroundTask, Singleton
+from .panels.files import FilesPanel
+from octopyclient.igtk import *
+from .menu import *
+from octopyclient.utils import *
 
 class idleStatusPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
@@ -16,14 +16,14 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         log.debug("idleStatusPanel created")
         self.bkgnd = BackgroundTask(ui, 'temperature_update', 2, self.update)
         # Specify menu buttons
-        menuItems = menu.getDefaultMenu()
+        menuItems = getDefaultMenu()
         buttons = Gtk.Grid()
         buttons.set_row_homogeneous(True)
         buttons.set_column_homogeneous(True)
         self.g.attach(buttons, 2, 0, 2, 2)
 
         self.arrangeMenuItems(buttons, menuItems, 2)
-        self.g.attach(igtk.ButtonImageStyle("Print", "print2.svg", "color2", self.showFiles), 2, 2, 2, 1)
+        self.g.attach(ButtonImageStyle("Print", "print2.svg", "color2", self.showFiles), 2, 2, 2, 1)
 
         self.showTools(self.ui)
         self.arrangeButtons()
@@ -76,7 +76,7 @@ class Tool:
         self.image = image
         self.printer = printer
         self.isHeating = False
-        self.button = igtk.ButtonImageFromFile("", image, None)
+        self.button = ButtonImageFromFile("", image, None)
         self.button.connect("clicked", self.clicked)
 
     def clicked(self, source):

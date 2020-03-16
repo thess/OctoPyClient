@@ -1174,7 +1174,8 @@ class OctoRest:
             currently either core or custom
             action – The identifier of the command, action from its definition
         """
-        return self._post('/api/system/commands/{}/{}'.format(source, action))
+
+        return self._post('/api/system/commands/{}/{}'.format(source, action), ret=False)
     
     #################
     ### TIMELAPSE ###

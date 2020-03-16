@@ -1,14 +1,14 @@
 # Menu templates from OctoScreen
 
-from common import CommonPanel
-from home import HomePanel
-from move import MovePanel
-from extrude import ExtrudePanel
-from control import ControlPanel
-from fan import FanPanel
-from system import SystemPanel
-from temperature import TemperaturePanel
-from filament import FilamentPanel
+from octopyclient.common import CommonPanel
+from .panels.home import HomePanel
+from .panels.move import MovePanel
+from .panels.extrude import ExtrudePanel
+from .panels.control import ControlPanel
+from .panels.fan import FanPanel
+from .panels.system import SystemPanel
+from .panels.temperature import TemperaturePanel
+from .panels.filament import FilamentPanel
 
 class MenuPanel(CommonPanel):
     def __init__(self, ui, parent, items):

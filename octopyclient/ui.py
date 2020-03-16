@@ -1,25 +1,25 @@
 import time
 import sdnotify
-from utils import *
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
-from octorest import OctoRest
-from splash import SplashPanel
-from common import BackgroundTask
-from idle_status import idleStatusPanel
-from print_status import PrintStatusPanel
+from .octorest.octorest import OctoRest
+from .splash import SplashPanel
+from octopyclient.common import BackgroundTask
+from .idle_status import idleStatusPanel
+from .print_status import PrintStatusPanel
+from octopyclient.utils import *
 
 ''' Test wapper for serializing OctoPrint API calls
 class OPClient():
     opclient:   OctoRest
 
-    def __init__(self, url, key):
+    def __init__(self, url, key, session=None):
         import threading
         self.xlock = threading.Lock()
-        self.opclient = OctoRest(url=url, apikey=key)
+        self.opclient = OctoRest(url=url, apikey=key, session=session)
 
     def __getattr__(self, attr):
         orig_attr = self.opclient.__getattribute__(attr)
@@ -45,11 +45,13 @@ class OPClient():
 
 def make_client(url, key):
     try:
+        # Create custom Session object with keep-alive disabled
+        # Supossedly OctoPrint REST API always closes connections.
         import requests
         sess = requests.Session()
         sess.keep_alive = False
         client = OctoRest(url=url, apikey=key, session=sess)
-        # client = OPClient(url, key)
+        # client = OPClient(url, key, sess)
         return client, None
     except Exception as err:
         msg = errToUser(err)

@@ -6,8 +6,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
-from utils import *
-import igtk
+from octopyclient.utils import *
+from octopyclient.igtk import *
 
 class Singleton(type):
     _instances = {}
@@ -44,7 +44,7 @@ class CommonPanel:
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
         if bAddBack:
-            self.addButton(igtk.ButtonImageFromFile("Back", "back.svg", self.ui.navHistory))
+            self.addButton(ButtonImageFromFile("Back", "back.svg", self.ui.navHistory))
 
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
@@ -64,7 +64,7 @@ class CommonPanel:
         return self.ui.scalef * val
 
     def arrangeMenuItems(self, grid, items, cols):
-        from menu import getPanel
+        from .menu import getPanel
         for i in range(len(items)):
             item = items[i]
             panel = getPanel(self.ui, self, item)
@@ -73,7 +73,7 @@ class CommonPanel:
                     color = "color{:d}".format((i % 4) + 1)
                     icon = "{:s}.svg".format(item['icon'])
                     row, column = divmod(i, cols)
-                    grid.attach(igtk.ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
+                    grid.attach(ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
                                 column, row, 1, 1)
 
     def addPanel(self, source, panel):

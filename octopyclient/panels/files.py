@@ -9,9 +9,9 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from common import CommonPanel, Singleton
-import igtk
-from utils import *
+from octopyclient.common import CommonPanel, Singleton
+from octopyclient.igtk import *
+from octopyclient.utils import *
 
 @dataclass
 class locationHistory:
@@ -72,10 +72,10 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return bar
 
     def createRefreshButton(self):
-        return igtk.ButtonImageWithSize("refresh.svg", self.Scaled(35), self.Scaled(35), self.doLoadFiles)
+        return ButtonImageWithSize("refresh.svg", self.Scaled(35), self.Scaled(35), self.doLoadFiles)
 
     def createBackButton(self):
-        return igtk.ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.filesNavigate)
+        return ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.filesNavigate)
 
     def filesNavigate(self, source):
         if isRoot(self.location):
@@ -142,7 +142,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         file.set_margin_end(15)
         file.set_hexpand(True)
 
-        file.add(igtk.ImageFromFileWithSize("folder.svg", self.Scaled(35), self.Scaled(35)))
+        file.add(ImageFromFileWithSize("folder.svg", self.Scaled(35), self.Scaled(35)))
         file.add(labels)
         file.add(actions)
 
@@ -178,7 +178,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         file.set_margin_end(15)
         file.set_hexpand(True)
 
-        file.add(igtk.ImageFromFileWithSize("file.svg", self.Scaled(35), self.Scaled(35)))
+        file.add(ImageFromFileWithSize("file.svg", self.Scaled(35), self.Scaled(35)))
         file.add(labels)
         file.add(actions)
 
@@ -186,7 +186,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         list.add(frame)
 
     def createOpenFolderButton(self, folder):
-        b = igtk.ButtonImageWithSize("open.svg", self.Scaled(35), self.Scaled(35), self.openFolder, folder)
+        b = ButtonImageWithSize("open.svg", self.Scaled(35), self.Scaled(35), self.openFolder, folder)
 
         ctx = b.get_style_context()
         # ctx.add_class("color1")
@@ -195,7 +195,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return b
 
     def createPrintButton(self, img, file):
-        b = igtk.ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askPrintFile, file)
+        b = ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askPrintFile, file)
 
         ctx = b.get_style_context()
         # ctx.add_class("color3")
@@ -204,7 +204,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return b
 
     def createDeleteButton(self, img, file):
-        b = igtk.ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askDeleteFile, file)
+        b = ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askDeleteFile, file)
 
         ctx = b.get_style_context()
         # ctx.add_class("color2")
@@ -221,7 +221,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
                       .format(strEllipsisLen(file['name'], 27)), doPrintFile, file)
 
     def askDeleteFile(self, source, file):
-        msg = "Delete file?" if not isFolder(file) else "Remove folder &amp; all its contents?"
+        msg = "Delete file?" if not isFolder(file) else "Remove folder and its contents?"
         confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
                       .format(msg, strEllipsisLen(file['name'], 27)), doDeleteFile, file)
 

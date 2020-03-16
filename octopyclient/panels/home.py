@@ -1,6 +1,6 @@
-from utils import *
-from common import CommonPanel, Singleton
-import igtk
+from octopyclient.utils import *
+from octopyclient.common import CommonPanel, Singleton
+from octopyclient.igtk import *
 
 class HomePanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, parent):
@@ -16,7 +16,7 @@ class HomePanel(CommonPanel, metaclass=Singleton):
         self.arrangeButtons()
 
     def createMoveButton(self, label, image, axes):
-        return igtk.ButtonImageStyle(label, image, "color2", self.homeRequest, axes)
+        return ButtonImageStyle(label, image, "color2", self.homeRequest, axes)
 
     def homeRequest(self, source, axes):
         log.debug("Homing {} axes".format(axes))
