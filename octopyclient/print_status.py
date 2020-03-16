@@ -7,10 +7,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from common import CommonPanel, Singleton, BackgroundTask
-from idle_status import idleStatusPanel
-import igtk
-from utils import *
+from octopyclient.common import CommonPanel, Singleton, BackgroundTask
+from .idle_status import idleStatusPanel
+from octopyclient.igtk import *
+from octopyclient.utils import *
 
 DAY_SECONDS = 24 * 3600
 
@@ -56,11 +56,11 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.g.attach(self.bed, 0, 1, 1, 1)
 
     def createInfoBox(self):
-        self.file = igtk.LabelWithImage("file2.svg", "")
+        self.file = LabelWithImage("file2.svg", "")
         self.file.l.set_name("NameLabel")
-        self.left = igtk.LabelWithImage("speed-step2.svg", "")
+        self.left = LabelWithImage("speed-step2.svg", "")
         self.left.l.set_name("TimeLabel")
-        self.finish = igtk.LabelWithImage("finish.svg", "")
+        self.finish = LabelWithImage("finish.svg", "")
         self.finish.l.set_name("TimeLabel")
 
         info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -78,29 +78,29 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         return info
 
     def createCompleteButton(self):
-        self.complete = igtk.ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.openIdleStatus)
+        self.complete = ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.openIdleStatus)
         return self.complete
 
     def createMenuButton(self):
-        self.menu = igtk.ButtonImageWithSize("control2.svg", self.Scaled(60), self.Scaled(60), self.openPrintMenu)
+        self.menu = ButtonImageWithSize("control2.svg", self.Scaled(60), self.Scaled(60), self.openPrintMenu)
         return self.menu
 
     def createPauseButton(self):
-        self.pause = igtk.ButtonImageWithSize("pause2.svg", self.Scaled(60), self.Scaled(60), self.doPause)
+        self.pause = ButtonImageWithSize("pause2.svg", self.Scaled(60), self.Scaled(60), self.doPause)
         return self.pause
 
     def createStopButton(self):
-        self.stop = igtk.ButtonImageWithSize("stop2.svg", self.Scaled(60), self.Scaled(60), self.doStop)
+        self.stop = ButtonImageWithSize("stop2.svg", self.Scaled(60), self.Scaled(60), self.doStop)
         return self.stop
 
     def createToolButton(self, img):
-        b = igtk.ButtonImageFromFile("", img, None)
+        b = ButtonImageFromFile("", img, None)
         ctx = b.get_style_context()
         ctx.add_class("printing-state")
         return b
 
     def createBedButton(self):
-        b = igtk.ButtonImage("", "bed2.svg", None)
+        b = ButtonImage("", "bed2.svg", None)
         ctx = b.get_style_context()
         ctx.add_class("printing-state")
         return b
@@ -153,7 +153,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
             self.printerStatus = status
             if status['printing']:
                 self.menu.set_sensitive(True)
-                self.pause.set_image(igtk.ImageFromFileWithSize("pause2.svg", self.Scaled(60), self.Scaled(60)))
+                self.pause.set_image(ImageFromFileWithSize("pause2.svg", self.Scaled(60), self.Scaled(60)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
                 self.pause.show()
@@ -163,7 +163,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
                 return
             elif status['paused']:
                 self.menu.set_sensitive(True)
-                self.pause.set_image(igtk.ImageFromFileWithSize("resume2.svg", self.Scaled(60), self.Scaled(60)))
+                self.pause.set_image(ImageFromFileWithSize("resume2.svg", self.Scaled(60), self.Scaled(60)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
                 self.pause.show()

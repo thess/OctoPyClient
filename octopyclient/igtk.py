@@ -1,13 +1,13 @@
 # Misc wrapper functions for Gtk object manipulation
 from attr import dataclass
+import os
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
 
-def imagePath(iname):
-    return "./styles/images/" + iname
+from .utils import imagePath
 
 def FmtLabel(string, *args):
     l = Gtk.Label()

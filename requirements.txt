@@ -1,6 +1,6 @@
-pygobject>=3.22.0
-humanize
-attr
-sdnotify
-urllib3
-requests
+###
+# This file and contents are to keep pip happy
+# Requirements can be found in setup.py in the
+# variables INSTALL_REQUIRES and EXTRA_REQUIRES.
+###
+.
