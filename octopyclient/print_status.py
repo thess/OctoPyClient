@@ -8,7 +8,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from octopyclient.common import CommonPanel, Singleton, BackgroundTask
-from .idle_status import idleStatusPanel
+from .idle_status import IdleStatusPanel
+from .print_menu import PrintMenuPanel
 from octopyclient.igtk import *
 from octopyclient.utils import *
 
@@ -18,7 +19,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
     pb: Gtk.ProgressBar
 
     def __init__(self, ui):
-        CommonPanel.__init__(self, ui, None)
+        CommonPanel.__init__(self, ui)
         log.debug("PrintStatusPanel created")
 
         self.bkgnd = BackgroundTask(ui, "print_status", 1, self.update)
@@ -33,7 +34,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.showTools()
 
         self.arrangeButtons(False)
-        self.printerStatus = 0
+        self.printerStatus = None
 
 
     def createProgressBar(self):
@@ -78,7 +79,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         return info
 
     def createCompleteButton(self):
-        self.complete = ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.openIdleStatus)
+        self.complete = ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.ui.navigateBack)
         return self.complete
 
     def createMenuButton(self):
@@ -106,10 +107,9 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         return b
 
     def openPrintMenu(self, source):
-        pass
-
-    def openIdleStatus(self, source):
-        self.ui.add(idleStatusPanel(self.ui))
+        # Force status reset on next update
+        self.printerStatus = None
+        self.ui.OpenPanel(PrintMenuPanel(self.ui), self)
 
     def doStop(self, source):
             confirmStopDialog(self, self.ui.printer)
@@ -244,7 +244,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.finish.l.set_label(finish)
 
 def confirmStopDialog(panel, printer):
-    dlg = Gtk.MessageDialog(parent=panel.ui.win,
+    dlg = Gtk.MessageDialog(parent=panel.ui.mainwin,
                             flags=Gtk.DialogFlags.MODAL,
                             type=Gtk.MessageType.QUESTION,
                             buttons=Gtk.ButtonsType.YES_NO)

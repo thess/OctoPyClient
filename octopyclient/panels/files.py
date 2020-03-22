@@ -40,8 +40,8 @@ def byDate(item):
     return key
 
 class FilesPanel(CommonPanel, metaclass=Singleton):
-    def __init__(self, ui, parent):
-        CommonPanel.__init__(self, ui, parent)
+    def __init__(self, ui):
+        CommonPanel.__init__(self, ui)
         log.debug("FilesPanel created")
 
         self.location = locationHistory(['local'])
@@ -79,7 +79,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
 
     def filesNavigate(self, source):
         if isRoot(self.location):
-            self.ui.navHistory(source)
+            self.ui.navigateBack(source)
         else:
             goUp(self.location)
             self.doLoadFiles()

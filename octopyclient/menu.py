@@ -11,33 +11,33 @@ from .panels.temperature import TemperaturePanel
 from .panels.filament import FilamentPanel
 
 class MenuPanel(CommonPanel):
-    def __init__(self, ui, parent, items):
-        CommonPanel.__init__(self, ui, parent)
+    def __init__(self, ui, items):
+        CommonPanel.__init__(self, ui)
         self.panelH = int(1 + len(items) / 4)
 
         self.arrangeMenuItems(self.g, items, 4)
         self.arrangeButtons()
 
-def getPanel(ui, parent, item):
+def getPanel(ui, item):
     pname = item['panel']
     if pname == "menu":
-        return MenuPanel(ui, parent, item['items'])
+        return MenuPanel(ui, item['items'])
     elif pname == "home":
-        return HomePanel(ui, parent)
+        return HomePanel(ui)
     elif pname == "extrude":
-        return ExtrudePanel(ui, parent)
+        return ExtrudePanel(ui)
     elif pname == "fan":
-        return FanPanel(ui, parent)
+        return FanPanel(ui)
     elif pname == "control":
-        return ControlPanel(ui, parent)
+        return ControlPanel(ui)
     elif pname == "move":
-        return MovePanel(ui, parent)
+        return MovePanel(ui)
     elif pname == "temperature":
-        return TemperaturePanel(ui, parent)
+        return TemperaturePanel(ui)
     elif pname == "filament":
-        return FilamentPanel(ui, parent)
+        return FilamentPanel(ui)
     elif pname == "system":
-        return SystemPanel(ui, parent)
+        return SystemPanel(ui)
 
 
     return None

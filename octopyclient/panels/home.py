@@ -3,8 +3,8 @@ from octopyclient.common import CommonPanel, Singleton
 from octopyclient.igtk import *
 
 class HomePanel(CommonPanel, metaclass=Singleton):
-    def __init__(self, ui, parent):
-        CommonPanel.__init__(self, ui, parent)
+    def __init__(self, ui):
+        CommonPanel.__init__(self, ui)
         log.debug("HomePanel created")
         self.panelH = 2
 
@@ -20,5 +20,9 @@ class HomePanel(CommonPanel, metaclass=Singleton):
 
     def homeRequest(self, source, axes):
         log.debug("Homing {} axes".format(axes))
-        self.ui.printer.home(axes)
+        try:
+            self.ui.printer.home(axes)
+        except Exception as err:
+            log.error("Homing axes: {}".format(str(err)))
+
  

@@ -8,7 +8,7 @@ from gi.repository import Gtk, Gdk
 from .octorest.octorest import OctoRest
 from .splash import SplashPanel
 from octopyclient.common import BackgroundTask
-from .idle_status import idleStatusPanel
+from .idle_status import IdleStatusPanel
 from .print_status import PrintStatusPanel
 from octopyclient.utils import *
 
@@ -43,7 +43,7 @@ class OPClient():
             return orig_attr
 '''
 
-def make_client(url, key):
+def open_client(url, key):
     try:
         # Create custom Session object with keep-alive disabled
         # Supossedly OctoPrint REST API always closes connections.
@@ -58,21 +58,24 @@ def make_client(url, key):
         log.error(msg)
         return None, msg
 
-def get_version(client):
-    message = "You are using OctoPrint v" + client.version['server']
-    return message
-
 class UI(Gtk.Window):
-    _rundown = []
+    _rundown = []       # Background timer threads to cancel
+    _backtrack = []     # Navigation history for 'back' buttons
+    _current: Gtk.Widget    # Active panel
+    _host: str          # URL of OctoPrint server
+    _key: str           # API key
+    mainwin: Gtk.Window # Main UI window
 
     def __init__(self, host, key, width, height, style_sheet):
         Gtk.Window.__init__(self, title="OctoPyClient")
 
-        self.win = self
-        self.host = host
-        self.key = key
-        self.scalef = 1.0
-        self.current = None
+        self.mainwin = self
+        self._host = host
+        self._key = key
+        self.scalef = 1.5 if width > 480 else 1.0
+        self._current = None
+        # Navigation backup fence
+        self._backtrack.append(None)
         self.now = int(time.time())
         self.printer = None
         self.connectionAttempts = 0
@@ -106,26 +109,39 @@ class UI(Gtk.Window):
         self.g = Gtk.Grid()
         o.add(self.g)
 
-    def OpenPanel(self, panel):
-        if self.current is not None:
-            self.Remove(self.current)
-
-        self.current = panel
-        self.current.Show()
-        self.g.attach(self.current.g, 0, 0, 1, 1)
+    def OpenPanel(self, panel, back=None):
+        if self._current is not None:
+            self.Remove(self._current)
+        # Push navigation 'back' context if specified
+        if back is not None:
+            self._backtrack.append(back)
+        self._current = panel
+        self._current.Show()
+        self.g.attach(self._current.g, 0, 0, 1, 1)
         self.g.show_all()
 
-    def Quit(self, p):
+    def Quit(self, source=None):
+        # Kill timer threads before exit
         for t in self._rundown:
-            t.cancel(p)
+            t.cancel()
         Gtk.main_quit()
 
     def Remove(self, p):
         self.g.remove(p.g)
         p.Hide()
 
-    def navHistory(self, source):
-        self.OpenPanel(self.current.parent)
+    def navigateBack(self, source):
+        try:
+            panel = self._backtrack.pop()
+        except IndexError:
+            log.error("Backup too far - reset navigation")
+            panel = None
+
+        if panel is not None:
+            self.OpenPanel(panel)
+        else:
+            # Open default panel if top or explicit return
+            self.OpenPanel(IdleStatusPanel(self))
 
     def update(self):
         if self.connectionAttempts > 8:
@@ -145,14 +161,17 @@ class UI(Gtk.Window):
         newUiState = "splash"
         splashMessage = "Initializing..."
 
+        # Connect if not open yet
         if self.printer is None:
-            self.printer, errMsg = make_client(self.host, self.key)
+            self.printer, errMsg = open_client(self._host, self._key)
 
         if self.printer is not None:
             try:
                 self.pState = self.printer.state()
                 if isOperational(self.pState):
                     newUiState = "idle"
+                    if self.UIState == "printing":
+                        self.UIState = newUiState
                 elif isPrinting(self.pState):
                     newUiState = "printing"
                 elif isError(self.pState):
@@ -172,6 +191,7 @@ class UI(Gtk.Window):
                 if not isRemoteDisconnect(err):
                     log.error("Getting printer state: {}".format(str(err)))
         else:
+            # Print connect retry
             splashMessage = errMsg
 
         self.sp.label.set_text(splashMessage)
@@ -182,7 +202,7 @@ class UI(Gtk.Window):
         try:
             if newUiState == "idle":
                     log.info("Printer is ready")
-                    self.OpenPanel(idleStatusPanel(self))
+                    self.OpenPanel(IdleStatusPanel(self))
             elif newUiState == "printing":
                     log.info("Printing a job")
                     self.OpenPanel(PrintStatusPanel(self))

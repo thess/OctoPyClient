@@ -97,7 +97,7 @@ def emptyContainer(list):
         list.remove(widget)
 
 def confirmDialog(panel, msg, cb, param):
-    dlg = Gtk.MessageDialog(parent=panel.ui.win,
+    dlg = Gtk.MessageDialog(parent=panel.ui.mainwin,
                             flags=Gtk.DialogFlags.MODAL,
                             type=Gtk.MessageType.QUESTION,
                             buttons=Gtk.ButtonsType.OK_CANCEL)

@@ -21,9 +21,8 @@ class CommonPanel:
     panelH: int
     panelW: int
 
-    def __init__(self, ui, parent):
+    def __init__(self, ui):
         self.ui = ui
-        self.parent = parent
         # Default panel layout 4x3
         self.panelW = 4
         self.panelH = 3
@@ -44,7 +43,7 @@ class CommonPanel:
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
         if bAddBack:
-            self.addButton(ButtonImageFromFile("Back", "back.svg", self.ui.navHistory))
+            self.addButton(ButtonImageFromFile("Back", "back.svg", self.ui.navigateBack))
 
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
@@ -54,11 +53,11 @@ class CommonPanel:
 
     def Show(self):
         if self.bkgnd is not None:
-            self.bkgnd.start(self.parent)
+            self.bkgnd.start()
 
     def Hide(self):
         if self.bkgnd is not None:
-            self.bkgnd.cancel(self.parent)
+            self.bkgnd.cancel()
 
     def Scaled(self, val):
         return self.ui.scalef * val
@@ -67,7 +66,7 @@ class CommonPanel:
         from .menu import getPanel
         for i in range(len(items)):
             item = items[i]
-            panel = getPanel(self.ui, self, item)
+            panel = getPanel(self.ui, item)
 
             if panel is not None:
                     color = "color{:d}".format((i % 4) + 1)
@@ -76,8 +75,8 @@ class CommonPanel:
                     grid.attach(ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
                                 column, row, 1, 1)
 
-    def addPanel(self, source, panel):
-        self.ui.OpenPanel(panel)
+    def addPanel(self, button, panel):
+        self.ui.OpenPanel(panel, self)
 
 class TimerTask(threading.Timer):
     def __init__(self, name, interval, callback, event):
@@ -106,7 +105,7 @@ class BackgroundTask():
     def queueIt(self):
         return GLib.idle_add(self.idleTask)
 
-    def start(self, source):
+    def start(self, source=None):
         # Invoke callback immediately. Timer queues callbacks after 1st interval
         GLib.idle_add(self.idleTask)
 
@@ -116,7 +115,7 @@ class BackgroundTask():
             log.info("Background task: {:s} - started".format(self.thread.getName()))
             return
 
-    def cancel(self, source):
+    def cancel(self):
         with self.lock:
             if self.thread.isAlive():
                 self.stopFlag.set()

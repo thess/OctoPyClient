@@ -19,8 +19,12 @@ Command-line opts:
 __version__ = "0.9.4"
 
 import sys
+import os
 import getopt
 import logging
+import yaml
+
+from attr import dataclass
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -32,11 +36,71 @@ from .utils import getStylePath, setStyleBase
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-
 class Usage(Exception):
     def __init__(self, msg):
         self.msg = msg
 
+HOMEPI = "/home/pi/"
+CONFIGFILE = ".octoprint/config.yaml"
+
+@dataclass
+class config:
+    api_key:    str
+    host:       str
+    port:       int
+
+
+def findConfigFile():
+    file = doFindConfigFile(HOMEPI)
+    if file is not None:
+        return file
+
+    usr = os.path.expanduser('~')
+    if usr is None:
+        return None
+
+    return doFindConfigFile(usr)
+
+def doFindConfigFile(base):
+    path = os.path.join(base, CONFIGFILE)
+    try:
+        os.stat(path)
+    except FileNotFoundError:
+        return None
+
+    return path
+
+def readConfigFile(configFile, cfg):
+    if configFile is None:
+        return
+    try:
+        with open(configFile, 'r') as f:
+            try:
+                yml = yaml.safe_load(f)
+            except yaml.YAMLError as err:
+                eprint("Error parsing: ({}) {}".format(configFile, str(err)))
+                return
+    except Exception as err:
+        raise Usage("Cannot read config file: {}".format(str(err)))
+
+    # Extract items - ignore missing (will use defaults)
+    # Items can be overridden by command-line options
+    try:
+        cfg.host = yml['server']['host']
+    except (AttributeError, KeyError):
+        pass
+
+    try:
+        cfg.port = yml['server']['port']
+    except (AttributeError, KeyError):
+        pass
+
+    try:
+        cfg.api_key = yml['api']['key']
+    except (AttributeError, KeyError):
+        pass
+
+    return
 
 def main(argv=None):
     # Parse any command-line args
@@ -52,11 +116,19 @@ def main(argv=None):
         # Gather command options
         loglevel = logging.WARNING
         logfile = None
-        api_key = None
         width = 480
         height = 320
         style_sheet = getStylePath("style.css")
 
+        # OctoPrint config defaults
+        cfg = config(None, "localhost", 5000)
+
+        # Find and parse possible local OctoPrint config file
+        octoprintConfig = findConfigFile()
+        if octoprintConfig is not None:
+            readConfigFile(octoprintConfig, cfg)
+
+        # Options may override config items
         for o, v in opts:
             if o in ['-h', '--help']:
                 print(__doc__)
@@ -67,16 +139,26 @@ def main(argv=None):
             elif o in ['-l', '--loglevel']:
                 loglevel = getattr(logging, v.upper())
             elif o in ['-k', '--key']:
-                api_key = v
+                cfg.api_key = v
             elif o in ['-s', '--style']:
                 setStyleBase(v)
-            # TODO: Implement remaining CLI options
+            elif o in ['-r', '--resolution']:
+                try:
+                    size = v.split('x')
+                    width = int(size[0])
+                    height = int(size[1])
+                except:
+                    raise Usage("Screen resolution invalid")
+            elif o in ['-c', '--config']:
+                    readConfigFile(v, cfg)
 
         # Remaining arg is octoprint host
-        if len(args) != 1:
-            raise Usage("Octoprint host name or IP required.")
+        if len(args) == 1:
+            hostURI = args[0]
+        else:
+            hostURI = "http://{:s}:{:d}".format(cfg.host, cfg.port)
 
-        if api_key is None:
+        if cfg.api_key is None:
             raise Usage("Octoprint API key required")
 
         try:
@@ -94,7 +176,7 @@ def main(argv=None):
             settings = Gtk.Settings.get_default()
             settings.set_property("gtk_application_prefer_dark_theme", True)
 
-            ui = UI(args[0], api_key, width, height, style_sheet)
+            ui = UI(hostURI, cfg.api_key, width, height, style_sheet)
 
             ui.show_all()
             ui.n.notify('READY=1')

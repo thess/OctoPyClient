@@ -10,10 +10,10 @@ from octopyclient.igtk import *
 from .menu import *
 from octopyclient.utils import *
 
-class idleStatusPanel(CommonPanel, metaclass=Singleton):
+class IdleStatusPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
-        CommonPanel.__init__(self, ui, None)
-        log.debug("idleStatusPanel created")
+        CommonPanel.__init__(self, ui)
+        log.debug("IdleStatusPanel created")
         self.bkgnd = BackgroundTask(ui, 'temperature_update', 2, self.update)
         # Specify menu buttons
         menuItems = getDefaultMenu()
@@ -29,7 +29,7 @@ class idleStatusPanel(CommonPanel, metaclass=Singleton):
         self.arrangeButtons()
 
     def showFiles(self, source):
-        self.ui.OpenPanel(FilesPanel(self.ui, self))
+        self.ui.OpenPanel(FilesPanel(self.ui), self)
 
     def update(self):
         self.updateTemperature()

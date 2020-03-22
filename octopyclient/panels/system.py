@@ -15,8 +15,8 @@ from octopyclient.igtk import *
 VERSION = __version__
 
 class SystemPanel(CommonPanel, metaclass=Singleton):
-    def __init__(self, ui, parent):
-        CommonPanel.__init__(self, ui, parent)
+    def __init__(self, ui):
+        CommonPanel.__init__(self, ui)
         log.debug("SystemPanel created")
 
         g = Gtk.Grid()
@@ -39,7 +39,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         bar.add(self.createCommandButton('restart', "restart"))
         bar.add(self.createCommandButton('reboot', "reboot2"))
         bar.add(self.createCommandButton('shutdown', "shutdown2"))
-        bar.add(ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.ui.navHistory))
+        bar.add(ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.ui.navigateBack))
 
         return bar
 

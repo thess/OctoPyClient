@@ -11,7 +11,7 @@ from octopyclient.igtk import *
 
 class SplashPanel(CommonPanel):
     def __init__(self, ui):
-        CommonPanel.__init__(self, ui, None)
+        CommonPanel.__init__(self, ui)
 
         logo = ImageFromFile("logo-octoprint.png")
 
@@ -66,4 +66,4 @@ class SplashPanel(CommonPanel):
         self.ui.connectionAttempts = 0
 
     def showSystem(self, source):
-        self.ui.OpenPanel(SystemPanel(self.ui, self))
+        self.ui.OpenPanel(SystemPanel(self.ui), self)
