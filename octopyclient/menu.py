@@ -51,7 +51,7 @@ DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                      {'name': 'Control', 'icon': 'control', 'panel': 'control'}]
                  },
                 {'name': 'Filament', 'icon': 'filament2', 'panel': 'filament'},
-                {'name': 'Configuration', 'icon': 'control2', 'panel': 'system'}]
+                {'name': 'System', 'icon': 'info2', 'panel': 'system'}]
 
 def getDefaultMenu():
     return DEFAULT_MENU

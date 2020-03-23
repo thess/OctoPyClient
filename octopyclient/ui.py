@@ -61,10 +61,12 @@ def open_client(url, key):
 class UI(Gtk.Window):
     _rundown = []       # Background timer threads to cancel
     _backtrack = []     # Navigation history for 'back' buttons
-    _current: Gtk.Widget    # Active panel
-    _host: str          # URL of OctoPrint server
-    _key: str           # API key
-    mainwin: Gtk.Window # Main UI window
+
+    _current:   Gtk.Widget  # Active panel
+    _host:      str         # URL of OctoPrint server
+    _key:       str         # API key
+    mainwin:    Gtk.Window  # Main UI window
+    scalef:     float       # Display scale factor (480w := 1.0)
 
     def __init__(self, host, key, width, height, style_sheet):
         Gtk.Window.__init__(self, title="OctoPyClient")
