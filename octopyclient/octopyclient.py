@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-""" OctoPyClient [opts] Octoprint-server
+""" OctoPyClient [opts] [server]
 
-Hostname or IP of Octoprint (default: localhost:5000)
+Hostname or IP of OctoPrint server installation (default: localhost:5000)
 
 Command-line opts:
 
@@ -48,7 +48,6 @@ class config:
     api_key:    str
     host:       str
     port:       int
-
 
 def findConfigFile():
     file = doFindConfigFile(HOMEPI)

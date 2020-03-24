@@ -39,7 +39,7 @@ class BackgroundTask():
         self.interval = interval
         self.name = name
         # Add to timer thread rundown list in UI
-        ui._rundown.append(self)
+        ui.addRundown(self)
 
     def queueIt(self):
         return GLib.idle_add(self.idleTask)

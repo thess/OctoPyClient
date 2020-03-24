@@ -122,6 +122,9 @@ class UI(Gtk.Window):
         self.g.attach(self._current.g, 0, 0, 1, 1)
         self.g.show_all()
 
+    def addRundown(self, task):
+        self._rundown.append(task)
+
     def Quit(self, source=None):
         # Kill timer threads before exit
         for t in self._rundown:

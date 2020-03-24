@@ -7,11 +7,27 @@ INSTALL_REQUIRES = [
     "pycairo",
     "humanize",
     "attrs",
+    "psutil",
     "sdnotify",
     "requests",
     "urllib3",
-    "yaml"
+    "pyyaml"
 ]
+
+# Install and setup display drivers Ex: Adafruit PiTFT installer
+#    $ sudo ./adafruit-pitft.sh
+# Dev tools for buiding yaml, cairo, etc.
+#    $ sudo apt install git libyaml-dev build-essential pkg-config
+# X11 requirements if console only system installed. Ex: Raspbian Lite
+#    $ sudo apt install xorg
+# General python3 installation requirements
+#    $ sudo apt install python3-pip python3-dev python3-setuptools python3-virtualenv virtualenv
+# Install system PyGObject
+#    $ sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
+# Requirements for pycairo (un-verified)
+#    $ sudo apt install libcairo2-dev libgirepository1.0-dev
+# Create and enter virtual environment
+#    $ virtualenv --python=python3 --system-site-packages venv
 
 EXTRAS_REQUIRE = {}
 
