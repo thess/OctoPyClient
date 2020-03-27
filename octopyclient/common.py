@@ -32,14 +32,15 @@ class TimerTask(threading.Timer):
         log.info("Timer thread: {:s} - exit".format(self.getName()))
 
 class BackgroundTask():
-    def __init__(self, ui, name, interval, idleTask):
+    def __init__(self, name, interval, idleTask, ui=None):
         self.stopFlag = threading.Event()
         self.idleTask = idleTask
         self.lock = threading.Lock()
         self.interval = interval
         self.name = name
         # Add to timer thread rundown list in UI
-        ui.addRundown(self)
+        if ui is not None:
+            ui.addRundown(self)
 
     def queueIt(self):
         return GLib.idle_add(self.idleTask)

@@ -88,7 +88,7 @@ class UI(Gtk.Window):
         self.n = sdnotify.SystemdNotifier()
 
         self.sp = SplashPanel(self)
-        self.bkgnd = BackgroundTask(self, 'state_check', 2, self.update)
+        self.bkgnd = BackgroundTask('state_check', 2, self.update, self)
 
         css_provider = Gtk.CssProvider()
         css_provider.load_from_path(style_sheet)

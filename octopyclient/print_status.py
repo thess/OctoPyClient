@@ -22,7 +22,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         CommonPanel.__init__(self, ui)
         log.debug("PrintStatusPanel created")
 
-        self.bkgnd = BackgroundTask(ui, "print_status", 1, self.update)
+        self.bkgnd = BackgroundTask("print_status", 1, self.update, ui)
 
         self.g.attach(self.createInfoBox(), 1, 0, 3, 1)
         self.g.attach(self.createProgressBar(), 1, 1, 3, 1)

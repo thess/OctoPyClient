@@ -14,7 +14,7 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
         log.debug("IdleStatusPanel created")
-        self.bkgnd = BackgroundTask(ui, 'temperature_update', 2, self.update)
+        self.bkgnd = BackgroundTask('temperature_update', 2, self.update, ui)
         # Specify menu buttons
         menuItems = getDefaultMenu()
         buttons = Gtk.Grid()

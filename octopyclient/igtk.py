@@ -1,10 +1,13 @@
 # Misc wrapper functions for Gtk object manipulation
+import time
 from attr import dataclass
-import os
+from typing import Callable
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+from gi.repository import GLib
+
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gdk, GdkPixbuf
 
@@ -80,3 +83,59 @@ def ButtonImageFromFile(label, imgName, clicked, parms=None):
     b.set_vexpand(True)
     b.set_hexpand(True)
     return b
+
+@dataclass
+class StepButton:
+    idx:   int          # current value
+    steps:  []          # possible (label, value) tuples
+    stcb:   Callable[..., None] # button update callback
+    b:      Gtk.Button  # associated button
+
+def createStepButton(image, steps, callback=None):
+    lbl = ""
+    if len(steps) > 0:
+        lbl = steps[0][0]
+
+    sb = StepButton(idx = 0, steps=steps, stcb=callback, b=None)
+    # Fill in struct with button reference
+    sb.b = ButtonImage(lbl, ImageFromFile(image), advStep, sb)
+
+    return sb
+
+def advStep(btn, sb):
+    sb.idx += 1
+    if sb.idx >= len(sb.steps):
+        sb.idx = 0
+
+    btn.set_label(sb.steps[sb.idx][0])
+
+    if sb.stcb is not None:
+        sb.stcb(sb.steps[sb.idx][1])
+
+@dataclass
+class PressedButton:
+    released:   bool        # button released flag
+    b:          Gtk.Button  # associated button
+    pcb:        Callable[..., None] # pressed interval callback
+    cbint:      int         # callback interval (ms)
+
+def createPressedButton(label, image, ms, pressed, param):
+    btn = ButtonImageFromFile(label, image, None)
+    pb = PressedButton(False, btn, pressed, ms)
+
+    if pressed is not None:
+        btn.connect("pressed", doButtonPressed, pb, param)
+
+    btn.connect("released", doButtonReleased, pb)
+    return pb
+
+def doButtonPressed(btn, pb, param):
+    pb.released = False
+    # Callback immediately before 1st interval
+    pb.pcb(pb, param)
+    # Queue timer next to idle dispatch
+    GLib.timeout_add(pb.cbint, pb.pcb, pb, param)
+
+def doButtonReleased(btn, pb):
+    # Signal timer to exit
+    pb.released = True

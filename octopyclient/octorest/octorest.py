@@ -409,13 +409,13 @@ class OctoRest:
             'select': select,
             'print': print,
         }
-        if not gcode == None:
+        if gcode is not None:
             data['gcode'] = gcode
-        if not position == None:
+        if position is not None:
             data['position'] = position
-        if not printer_profile == None:
+        if printer_profile is not None:
             data['printerProfile'] = printer_profile
-        if not profile == None:
+        if profile is not None:
             data['profile'] = profile
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
     
