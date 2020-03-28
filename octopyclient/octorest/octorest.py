@@ -964,6 +964,15 @@ class OctoRest:
         """
         return self._get('/api/printer/sd')
 
+    def custom_control_request(self):
+        """Retrieves the custom controls as configured in config.yaml.
+        http://docs.octoprint.org/en/master/api/printer.html#get--api-printer-command-custom
+.
+        The response will contain a list of custom control definitions.
+        A 200 OK with a List all response will be returned.
+        """
+        return self._get('/api/printer/command/custom')
+
     def gcode(self, command):
         """Send an arbitrary command to the printer
         http://docs.octoprint.org/en/master/api/printer.html#send-an-arbitrary-command-to-the-printer

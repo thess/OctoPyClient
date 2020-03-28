@@ -14,7 +14,7 @@ from octopyclient.utils import *
 
 @dataclass
 class locationHistory:
-    locations: []
+    locations: [str]
 
 def currentLoc(lh):
     return lh.locations[len(lh.locations) - 1]

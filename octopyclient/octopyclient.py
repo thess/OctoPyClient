@@ -185,6 +185,8 @@ def main(argv=None):
         except:
             exc_type, exc_value, exc_tb = sys.exc_info()
             if exc_type == KeyboardInterrupt:
+                if ui is not None:
+                    ui.Quit()
                 return 0
             logging.exception("Caught network or other error:")
 

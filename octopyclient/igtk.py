@@ -108,9 +108,13 @@ def advStep(btn, sb):
         sb.idx = 0
 
     btn.set_label(sb.steps[sb.idx][0])
-
     if sb.stcb is not None:
-        sb.stcb(sb.steps[sb.idx][1])
+        sb.stcb()
+
+def addStep(sb, step):
+    if len(sb.steps) == 0:
+        sb.b.set_label(step[0])
+    sb.steps.append(step)
 
 @dataclass
 class PressedButton:
@@ -119,7 +123,7 @@ class PressedButton:
     pcb:        Callable[..., None] # pressed interval callback
     cbint:      int         # callback interval (ms)
 
-def createPressedButton(label, image, ms, pressed, param):
+def createPressedButton(label, image, ms, pressed, param=None):
     btn = ButtonImageFromFile(label, image, None)
     pb = PressedButton(False, btn, pressed, ms)
 
@@ -132,7 +136,9 @@ def createPressedButton(label, image, ms, pressed, param):
 def doButtonPressed(btn, pb, param):
     pb.released = False
     # Callback immediately before 1st interval
-    pb.pcb(pb, param)
+    if not pb.pcb(pb, param):
+        return
+
     # Queue timer next to idle dispatch
     GLib.timeout_add(pb.cbint, pb.pcb, pb, param)
 
