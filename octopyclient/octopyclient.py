@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-""" OctoPyClient [opts] [server]
+"""
+  OctoPyClient [opts] [server]
 
 Hostname or IP of OctoPrint server installation (default: localhost:5000)
 
@@ -130,6 +131,7 @@ def main(argv=None):
         # Options may override config items
         for o, v in opts:
             if o in ['-h', '--help']:
+                print("OctoPrint ({:s}) touchscreen client".format(__version__))
                 print(__doc__)
                 return
 
@@ -191,6 +193,7 @@ def main(argv=None):
             logging.exception("Caught network or other error:")
 
     except Usage as err:
+        eprint("OctoPrint ({:s}) touchscreen client\n".format(__version__))
         eprint(err.msg)
         eprint("for help use --help")
         return 2
