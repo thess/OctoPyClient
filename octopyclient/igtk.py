@@ -9,7 +9,7 @@ from gi.repository import Gtk
 from gi.repository import GLib
 
 gi.require_version('GdkPixbuf', '2.0')
-from gi.repository import Gdk, GdkPixbuf
+from gi.repository import GdkPixbuf
 
 from .utils import imagePath
 
@@ -19,13 +19,19 @@ def FmtLabel(string, *args):
     return l
 
 def ImageFromFile(imgname):
-    img = Gtk.Image()
-    img.set_from_file(imagePath(imgname))
+    try:
+        p = GdkPixbuf.Pixbuf.new_from_file(imagePath(imgname))
+        img = Gtk.Image.new_from_pixbuf(p)
+    except:
+        return Gtk.Image.new_from_stock(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
     return img
 
 def ImageFromFileWithSize(imgname, w, h):
-    p = GdkPixbuf.Pixbuf.new_from_file_at_scale(imagePath(imgname), w, h, True)
-    img = Gtk.Image.new_from_pixbuf(p)
+    try:
+        p = GdkPixbuf.Pixbuf.new_from_file_at_scale(imagePath(imgname), w, h, True)
+        img = Gtk.Image.new_from_pixbuf(p)
+    except:
+        return Gtk.Image.new_from_stock(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
     return img
 
 @dataclass
@@ -98,7 +104,7 @@ def createStepButton(image, steps, callback=None):
 
     sb = StepButton(idx = 0, steps=steps, stcb=callback, b=None)
     # Fill in struct with button reference
-    sb.b = ButtonImage(lbl, ImageFromFile(image), advStep, sb)
+    sb.b = ButtonImageFromFile(lbl, image, advStep, sb)
 
     return sb
 

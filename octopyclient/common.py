@@ -57,9 +57,13 @@ class BackgroundTask():
 
     def cancel(self):
         with self.lock:
-            if self.thread.isAlive():
-                self.stopFlag.set()
-                self.thread.join()
+            try:
+                if self.thread.isAlive():
+                    self.stopFlag.set()
+                    self.thread.join()
+            except AttributeError:
+                # Ignore timer not started errors
+                pass
             return
 
 class CommonPanel:

@@ -16,7 +16,7 @@ class HomePanel(CommonPanel, metaclass=Singleton):
         self.arrangeButtons()
 
     def createMoveButton(self, label, image, axes):
-        return ButtonImageStyle(label, image, "color2", self.homeRequest, axes)
+        return ButtonImageFromFile(label, image, self.homeRequest, axes)
 
     def homeRequest(self, source, axes):
         log.debug("Homing {} axes".format(axes))

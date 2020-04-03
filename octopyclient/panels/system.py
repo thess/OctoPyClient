@@ -39,7 +39,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         bar.add(self.createCommandButton('restart', "restart"))
         bar.add(self.createCommandButton('reboot', "reboot2"))
         bar.add(self.createCommandButton('shutdown', "shutdown2"))
-        bar.add(ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.ui.navigateBack))
+        bar.add(ButtonImageWithSize("back.svg", self.Scaled(60), self.Scaled(60), self.ui.navigateBack))
 
         return bar
 
@@ -112,7 +112,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         return info
 
     def createCommandButton(self, name, image):
-        b = ButtonImageWithSize(image + ".svg", self.Scaled(35), self.Scaled(35), self.askSystemCommand)
+        b = ButtonImageWithSize(image + ".svg", self.Scaled(60), self.Scaled(60), self.askSystemCommand)
         b.set_name(name)
         return b
 

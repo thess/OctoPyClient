@@ -47,6 +47,7 @@ class MovePanel(CommonPanel, metaclass=Singleton):
                 self.ui.printer.jog(z=dist)
         except Exception as err:
             log.error("Move {}={}: {}".format(vect[0], vect[1], str(err)))
+            return False
 
         return True
 

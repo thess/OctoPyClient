@@ -22,11 +22,12 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
     def loadProfiles(self):
         try:
             settings = self.ui.printer.settings()
+            profiles = settings['temperature']['profiles']
         except Exception as err:
-            log.error("Get printer settings; {}".format(str(err)))
+            log.error("Get printer profiles: {}".format(str(err)))
             return
 
-        for profile in settings['temperature']['profiles']:
+        for profile in profiles:
             self.addButton(self.createProfileButton("heat-up.svg", profile))
 
         self.addButton(self.createProfileButton("cool-down.svg", {'name':'Cool Down', 'bed':0, 'extruder':0}))
@@ -36,7 +37,7 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
         return btn
 
     def doSetProfile(self, button, profile):
-        for tool in self.tp.labels:
+        for tool in self.tp.toolButtons:
             temp = profile['extruder']
             if tool == "bed":
                 temp = profile['bed']
@@ -48,10 +49,9 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
 
 
 class TemperaturePanel(CommonPanel, metaclass=Singleton):
-    tool:     StepButton
-    amount:   StepButton
-    toolData: Gtk.Box
-    labels:   {}            # Dictionary of tools and associated button image
+    tool:           StepButton    # Tool selector
+    amount:         StepButton    # Temperature delta selector
+    toolButtons:    {}            # Dictionary of tools and associated button image
 
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
@@ -62,17 +62,18 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         self.g.attach(self.createChangeButton("Increase", "increase.svg", 1), 0, 0, 1, 1)
         self.g.attach(self.createChangeButton("Decrease", "decrease.svg", -1), 3, 0, 1, 1)
 
-        self.toolData = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        self.toolData.set_valign(Gtk.Align.CENTER)
-        self.toolData.set_halign(Gtk.Align.CENTER)
-        self.g.attach(self.toolData, 1, 1, 2, 1)
-
-        self.labels = {}
+        self.toolButtons = {}
         self.g.attach(self.createToolButton(), 0, 1, 1, 1)
+
+        self.load = ButtonImageFromFile("Load", "extrude.svg", self.doLoadFilament)
+        self.g.attach(self.load, 1, 1, 1, 1)
+        self.unload = ButtonImageFromFile("Unload", "retract.svg", self.doUnloadFilament)
+        self.g.attach(self.unload, 2, 1, 1, 1)
+
         self.amount = createStepButton("move-step.svg",
                                        [("10°C", 10.0), ("5°C", 5.0), ("1°C", 1.0)])
         self.g.attach(self.amount.b, 1, 0, 1, 1)
-        self.g.attach(ButtonImageFromFile("More", "heat-up.svg", self.showProfile), 2, 0, 1, 1)
+        self.g.attach(ButtonImageFromFile("Presets", "heat-up.svg", self.showProfile), 2, 0, 1, 1)
 
         self.arrangeButtons()
 
@@ -85,18 +86,27 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         return self.tool.b
 
     def changeTool(self):
-        img = "extruder2.svg"
         if self.tool.steps[self.tool.idx][1] == 'bed':
+            self.load.set_sensitive(False)
+            self.unload.set_sensitive(False)
             img = "bed2.svg"
+        else:
+            self.load.set_sensitive(True)
+            self.unload.set_sensitive(True)
+            img = "extruder2.svg"
 
         self.tool.b.set_image(ImageFromFile(img))
+        self.updateToolData()
 
     def doChangeTarget(self, pb, direction):
         if pb.released:
             return False
 
         tool = self.tool.steps[self.tool.idx][1]
-        target = self.getToolTarget(tool) + float(direction * self.amount.steps[self.amount.idx][1])
+        target = self.getToolTarget(tool)
+        if target < 0:
+            return False
+        target += float(direction * self.amount.steps[self.amount.idx][1])
         # Stop updating if .lt. 0
         if target < 0:
             return False
@@ -110,8 +120,13 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
             if printer_state['temperature']:
                 return printer_state['temperature'][tool]['target']
         except Exception as err:
-            log.error("Getting current temp {:s}".format(tool))
-            return 0
+            if type(err) is IndexError:
+                log.error("Cannot find tool: {:s}".format(tool))
+            else:
+                log.error("Getting current temp: {}".format(str(err)))
+            return -1
+        # No temperature data
+        return 0
 
     def setTarget(self, tool, target):
         try:
@@ -131,10 +146,8 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
             img = "bed2.svg"
 
         log.info("Adding tool: {:s}".format(name))
-
-        self.labels[name] = LabelWithImage(img, "")
-        self.toolData.add(self.labels[name].b)
-        addStep(self.tool, (name.capitalize(), name))
+        self.toolButtons[name] = ButtonImageFromFile("", img, None)
+        addStep(self.tool, ("", name))
         self.changeTool()
 
     def updateToolData(self):
@@ -146,12 +159,21 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
 
         toolTemps = printer_state['temperature']
         for tool in toolTemps:
-            if tool not in self.labels:
+            if tool not in self.toolButtons:
                 self.addNewTool(tool)
             # Display temperature data
-            self.displayTemp(tool, toolTemps[tool])
+            txt = "{:.0f}°C ⇒ {:.0f}°C".format(toolTemps[tool]['actual'], toolTemps[tool]['target'])
+            self.tool.b.set_label(txt)
 
-    def displayTemp(self, tool, temps):
-        txt = "{:s}: {:.0f}°C ⇒ {:.0f}°C".format(tool.capitalize(), temps['actual'], temps['target'])
-        self.labels[tool].l.set_label(txt)
-        self.labels[tool].b.show_all()
+    # Prusa/Marlin based firmware support M701/M702 codes
+    def doLoadFilament(self):
+        self.executeGCode("M701")
+
+    def doUnloadFilament(self):
+        self.executeGCode("M702")
+
+    def executeGCode(self, cmds):
+        try:
+            self.ui.printer.gcode(cmds)
+        except Exception as err:
+            log.error("GCode rejected: {}".format(str(err)))

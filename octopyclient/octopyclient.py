@@ -16,7 +16,7 @@ Command-line opts:
 
 """
 
-__version__ = "0.9.6"
+__version__ = "0.9.8"
 
 import sys
 import os

@@ -101,6 +101,7 @@ def confirmDialog(panel, msg, cb, param):
                             flags=Gtk.DialogFlags.MODAL,
                             type=Gtk.MessageType.QUESTION,
                             buttons=Gtk.ButtonsType.OK_CANCEL)
+    dlg.set_decorated(False)
     dlg.set_markup(msg)
 
     box = dlg.get_content_area()

@@ -21,13 +21,11 @@ class FanPanel(CommonPanel, metaclass=Singleton):
         if speed == 0:
             label = "Fan Off"
             image = "fan-off.svg"
-            color = "color2"
         else:
             label = "{:d} %".format(speed)
             image = "fan.svg"
-            color = "color4"
 
-        return ButtonImageStyle(label, image, color, self.setFanSpeed, speed)
+        return ButtonImageFromFile(label, image, self.setFanSpeed, speed)
 
     def setFanSpeed(self, button, speed):
         log.debug("Setting fans speed: {:d} %".format(speed))

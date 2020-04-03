@@ -23,7 +23,7 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
         self.g.attach(buttons, 2, 0, 2, 2)
 
         self.arrangeMenuItems(buttons, menuItems, 2)
-        self.g.attach(ButtonImageStyle("Print", "print2.svg", "color2", self.showFiles), 2, 2, 2, 1)
+        self.g.attach(ButtonImageStyle("Print/Files", "print2.svg", "color2", self.showFiles), 2, 2, 2, 1)
 
         self.showTools(self.ui)
         self.arrangeButtons()
@@ -109,25 +109,23 @@ class Tool:
     def getProfileTemperature(self, source):
         temperature = 0
         try:
-            s = self.printer.settings()
+            settings = self.printer.settings()
+            profiles = settings['temperature']['profiles']
         except Exception as err:
-            log.error(str(err))
-            return
+            log.error("Get printer profiles: {}".format(str(err)))
+            return temperature
 
         try:
-            profs = s['temperature']['profiles']
-            if s is not None and len(profs) > 0:
-                for p in profs:
-                    if p['name'] == 'PLA':
-                        if self.name == "Bed":
-                            temperature = p['bed']
-                            break
-                        else:
-                            temperature = p['extruder']
-                            break
-
-        except Exception as e:
-            log.warning("Printer profile key {} not found ".format(str(e)))
+            for p in profiles:
+                if p['name'] == 'PLA':
+                    if self.name == "Bed":
+                        temperature = p['bed']
+                        break
+                    else:
+                        temperature = p['extruder']
+                        break
+        except Exception as err:
+            log.warning("PLA profile not found: {}".format(str(err)))
 
         if temperature == 0:
             if self.name == "Bed":

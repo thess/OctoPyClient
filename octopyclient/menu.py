@@ -1,4 +1,5 @@
 # Menu templates from OctoScreen
+from octopyclient.utils import log
 
 from octopyclient.common import CommonPanel
 from .panels.home import HomePanel
@@ -8,7 +9,6 @@ from .panels.control import ControlPanel
 from .panels.fan import FanPanel
 from .panels.system import SystemPanel
 from .panels.temperature import TemperaturePanel
-from .panels.filament import FilamentPanel
 
 class MenuPanel(CommonPanel):
     def __init__(self, ui, items):
@@ -34,12 +34,10 @@ def getPanel(ui, item):
         return MovePanel(ui)
     elif pname == "temperature":
         return TemperaturePanel(ui)
-    elif pname == "filament":
-        return FilamentPanel(ui)
     elif pname == "system":
         return SystemPanel(ui)
 
-
+    log.critical("Panel '{}' not found".format(pname))
     return None
 
 DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
@@ -48,9 +46,9 @@ DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                      {'name': 'Extrude', 'icon': 'filament', 'panel': 'extrude'},
                      {'name': 'Fan', 'icon': 'fan', 'panel': 'fan'},
                      {'name': 'Temperature', 'icon': 'heat-up', 'panel': 'temperature'},
-                     {'name': 'Control', 'icon': 'control', 'panel': 'control'}]
+                     {'name': 'Controls', 'icon': 'control', 'panel': 'control'}]
                  },
-                {'name': 'Filament', 'icon': 'filament2', 'panel': 'filament'},
+                {'name': 'Temperature', 'icon': 'heat-up', 'panel': 'temperature'},
                 {'name': 'System', 'icon': 'info2', 'panel': 'system'}]
 
 def getDefaultMenu():
