@@ -27,6 +27,11 @@ INSTALL_REQUIRES = [
 #    $ sudo apt install python3-yaml python3-gi python3-gi-cairo gir1.2-gtk-3.0
 # Create and enter virtual environment
 #    $ virtualenv --python=python3 --system-site-packages venv
+#    $ source venv/bin/activate
+#    $ pip install pip --upgrade
+#    $ pip install --no-cache-dir octopyclient
+# [testing repo]
+#    $ pip install --index-url https://test.pypi.org/simple/ --no-cache-dir --no-deps octopyclient
 
 EXTRAS_REQUIRE = {}
 

@@ -54,20 +54,28 @@ class ControlPanel(CommonPanel, metaclass=Singleton):
 
         return commands['custom']
 
-
     def createControlButton(self, control, imgName):
         if 'confirm' in control:
-            pass
+            cb = self.askCommand
+        else:
+            cb = self.execCommand
 
-        btn = ButtonImageFromFile(strEllipsisLen(control['name'], 16), imgName+".svg", self.execCommand, control)
+        btn = ButtonImageFromFile(strEllipsisLen(control['name'], int(self.Scaled(12))),
+                                  imgName+".svg", cb, control)
         return btn
 
     def createCommandButton(self, command, imgName):
         if 'confirm' in command:
-            pass
+            cb = self.askSystemCommand
+        else:
+            cb = self.execSystemCommand
 
-        btn = ButtonImageFromFile(strEllipsisLen(command['name'], 16), imgName+".svg", self.execSystemCommand, command)
+        btn = ButtonImageFromFile(strEllipsisLen(command['name'], int(self.Scaled(12))),
+                                  imgName+".svg", cb, command)
         return btn
+
+    def askSystemCommand(self, source, cmd):
+        confirmDialog(self, fixupHTML(cmd['confirm']), self.execSystemCommand, cmd)
 
     def execSystemCommand(self, source, command):
         log.info("Executing system command: {}".format(command['name']))
@@ -76,8 +84,11 @@ class ControlPanel(CommonPanel, metaclass=Singleton):
         except Exception as err:
             log.error("Command {:s} failed: {}".format(command['name'], str(err)))
 
+    def askCommand(self, source, cmd):
+        confirmDialog(self, fixupHTML(cmd['confirm']), self.execCommand, cmd)
 
     def execCommand(self, source, control):
+        log.info("Executing command: {}".format(control['name']))
         if 'commands' in control:
             cmd = list(control['commands'])
         else:

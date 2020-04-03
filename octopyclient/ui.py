@@ -187,7 +187,7 @@ class UI(Gtk.Window):
                     newUiState = "splash"
                     splashMessage = "Startup..."
                 elif isConnecting(self.pState):
-                        splashMessage = self.pState + "..."
+                        splashMessage = "Printer state: " + self.pState + "..."
             except Exception as err:
                 # After 10sec - display reason
                 if (int(time.time()) - self.now) > 10:

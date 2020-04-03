@@ -4,3 +4,4 @@ venv
 build
 dist
 OctoPyClient.egg-info
+mkrelease

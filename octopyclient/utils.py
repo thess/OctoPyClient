@@ -117,3 +117,13 @@ def confirmDialog(panel, msg, cb, param):
             cb(panel, param)
     finally:
         dlg.destroy()
+
+def fixupHTML(msg):
+    # replace 'strong' with 'b'
+    msg = msg.replace("<strong>", "<b>")
+    msg = msg.replace("</strong>", "</b>")
+    # remove 'p'
+    msg = msg.replace("<p>", " ")
+    msg = msg.replace("</p>", " ")
+
+    return msg
