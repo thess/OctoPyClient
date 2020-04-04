@@ -3,7 +3,7 @@ import threading
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 from gi.repository import GLib
 
 from octopyclient.utils import *
@@ -129,3 +129,46 @@ class CommonPanel:
 
     def addPanel(self, button, panel):
         self.ui.OpenPanel(panel, self)
+
+# Sub-class logger handler to supply pop-up notifications
+class LogHandler(logging.Handler):
+    nBox:   Gtk.Box     # Pop-up notifications
+    evt:    Gtk.EventBox
+    tt:     threading.Timer
+
+    def __init__(self):
+        logging.Handler.__init__(self)
+        # Container
+        self.nBox = Gtk.Box(Gtk.Orientation.VERTICAL, spacing=5)
+        self.nBox.set_valign(Gtk.Align.START)
+        self.nBox.set_halign(Gtk.Align.CENTER)
+        self.nBox.set_hexpand(True)
+
+    def handle(self, record):
+        if record.levelno < logging.WARNING:
+            return
+
+        dpyTime = 4.0 if record.levelno == logging.WARNING else 10.0
+
+        # Create pop-up message box label with formatted text
+        lbl = FmtLabel("<b>{:s}</b>".format(record.msg))
+        lbl.set_line_wrap(True)
+        ctx = lbl.get_style_context()
+        ctx.add_class("notification")
+        ctx.add_class(record.levelname.lower())
+        # Now the actual box
+        self.evt = Gtk.EventBox()
+        self.evt.add(lbl)
+        self.evt.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+        self.evt.connect("button-press-event", self.buttonPressed)
+        # Realize popup
+        self.nBox.add(self.evt)
+        self.nBox.show_all()
+        # Start timer thread to destroy pop-up
+        self.tt = threading.Timer(dpyTime, self.buttonPressed)
+        self.tt.start()
+
+    def buttonPressed(self, parent=None, button=None):
+        # Cancel timer (if necessary)
+        self.tt.cancel()
+        GLib.idle_add(self.evt.destroy)

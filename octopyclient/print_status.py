@@ -8,7 +8,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from octopyclient.common import CommonPanel, Singleton, BackgroundTask
-from .idle_status import IdleStatusPanel
 from .print_menu import PrintMenuPanel
 from octopyclient.igtk import *
 from octopyclient.utils import *

@@ -1,9 +1,5 @@
 # Select pre-heat based on material type
 
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
 from octopyclient.utils import *
 from octopyclient.common import CommonPanel, Singleton, BackgroundTask
 from octopyclient.igtk import *
@@ -15,7 +11,6 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
         log.debug("ProfilePanel created")
         self.tp = tempPanel
         self.panelH = 2
-
         self.loadProfiles()
         self.arrangeButtons()
 
@@ -27,8 +22,17 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
             log.error("Get printer profiles: {}".format(str(err)))
             return
 
+        pcount = 0
         for profile in profiles:
+            if pcount >= 10:
+                log.warning("More than 10 presets. Skipping remainder.")
+                break
+
             self.addButton(self.createProfileButton("heat-up.svg", profile))
+            pcount += 1
+
+        if pcount > 6:
+            self.panelH = 3
 
         self.addButton(self.createProfileButton("cool-down.svg", {'name':'Cool Down', 'bed':0, 'extruder':0}))
 

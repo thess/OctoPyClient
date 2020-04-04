@@ -7,7 +7,7 @@ from gi.repository import Gtk, Gdk
 
 from .octorest.octorest import OctoRest
 from .splash import SplashPanel
-from octopyclient.common import BackgroundTask
+from octopyclient.common import BackgroundTask, LogHandler
 from .idle_status import IdleStatusPanel
 from .print_status import PrintStatusPanel
 from octopyclient.utils import *
@@ -83,8 +83,10 @@ class UI(Gtk.Window):
         self.connectionAttempts = 0
         self.UIState = None
         self.pState = None
-        # TODO: Add pop-up notifications
-        self.notify = None
+        # Add pop-up notifications
+        self.notify = LogHandler()
+        log.addHandler(self.notify)
+        # Keep systemd happy
         self.n = sdnotify.SystemdNotifier()
 
         self.sp = SplashPanel(self)
@@ -110,6 +112,7 @@ class UI(Gtk.Window):
 
         self.g = Gtk.Grid()
         o.add(self.g)
+        o.add_overlay(self.notify.nBox)
 
     def OpenPanel(self, panel, back=None):
         if self._current is not None:
@@ -182,7 +185,7 @@ class UI(Gtk.Window):
                 elif isError(self.pState):
                     pass
                 elif isOffline(self.pState):
-                    log.info("Attempting to connect")
+                    log.info("Attempting to connect to printer")
                     self.printer.connect()
                     newUiState = "splash"
                     splashMessage = "Startup..."

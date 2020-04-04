@@ -48,7 +48,7 @@ DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                      {'name': 'Temperature', 'icon': 'heat-up', 'panel': 'temperature'},
                      {'name': 'Controls', 'icon': 'control', 'panel': 'control'}]
                  },
-                {'name': 'Temperature', 'icon': 'heat-up', 'panel': 'temperature'},
+                {'name': 'Temperature', 'icon': 'heat-up2', 'panel': 'temperature'},
                 {'name': 'System', 'icon': 'info2', 'panel': 'system'}]
 
 def getDefaultMenu():

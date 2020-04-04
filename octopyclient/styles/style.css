@@ -66,14 +66,14 @@ entry {
 }
 
 .dialog {
-        border: 2px solid black;
+        border: 2px solid #333333;
         font-size: 16px;
         padding: 5px;
-        background-color: #000;
 }
 
 .dialog button {
         padding: 20px 40px 20px 40px;
+        border-bottom: 4px solid #009384;
 }
 
 .message {

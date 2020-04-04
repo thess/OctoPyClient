@@ -1,3 +1,5 @@
+# Misc control functions and OctoPrint user defined commands and controls
+
 from octopyclient.utils import *
 from octopyclient.common import CommonPanel, Singleton
 from octopyclient.igtk import *
@@ -10,20 +12,33 @@ class ControlPanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
         log.debug("ControlPanel created")
-
+        # Default to 2 rows of buttons
         self.panelH = 2
+        cCount = 0
 
         for c in controls:
             btn = self.createControlButton(c, c['icon'])
             self.addButton(btn)
+            cCount += 1
 
         for c in self.getCustomControls():
+            if cCount >= 11:
+                log.warning("More than 11 commands. Skipping...")
+                break
             btn = self.createControlButton(c, "custom-script")
             self.addButton(btn)
+            cCount += 1
 
         for c in self.getCommands():
+            if cCount >= 10:
+                log.warning("More than 11 commands. Skipping...")
+                break
             btn = self.createCommandButton(c, "custom-script")
             self.addButton(btn)
+            cCount += 1
+
+        if cCount > 7:
+            self.panelH = 3
 
         self.arrangeButtons()
 

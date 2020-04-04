@@ -17,7 +17,7 @@ Command-line opts:
 
 """
 
-__version__ = "0.9.9"
+__version__ = "0.9.10"
 
 import sys
 import os
@@ -33,6 +33,7 @@ from gi.repository import Gtk
 
 from .ui import UI
 from .utils import getStylePath, setStyleBase
+from .common import LogHandler
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -165,6 +166,7 @@ def main(argv=None):
         try:
             logfmt = '%(asctime)s.%(msecs)03d  OctoPyClient%(levelname)8s %(filename)s:%(lineno)d - %(message)s'
             logtime = '%H:%M:%S'
+            # Set root logger level default to ERROR. Set to WARNING when DEBUG requested.
             rootLoglevel = logging.WARNING if loglevel == logging.DEBUG else logging.ERROR
             if not logfile:
                 logging.basicConfig(level=rootLoglevel, stream=sys.stdout, format=logfmt, datefmt=logtime)
