@@ -196,8 +196,10 @@ class UI(Gtk.Window):
                 if (int(time.time()) - self.now) > 10:
                     splashMessage = errToUser(err)
                     newUiState = "splash"
-                if not isRemoteDisconnect(err):
+                elif not isRemoteDisconnect(err):
                     log.error("Getting printer state: {}".format(str(err)))
+                else:
+                    log.debug("Ignoring remote disconnect")
         else:
             # Print connect retry
             splashMessage = errMsg

@@ -111,9 +111,16 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.ui.OpenPanel(PrintMenuPanel(self.ui), self)
 
     def doStop(self, source):
-            confirmStopDialog(self, self.ui.printer)
+        # Skip this if cancelling
+        if self.ui.pState == "Cancelling":
+            log.warning("Job is cancelling")
+            return
+        confirmStopDialog(self, self.ui.printer)
 
     def doPause(self, source):
+        if self.ui.pState == "Cancelling":
+            log.warning("Job is cancelling")
+            return
         try:
             log.warning("Pausing/Resuming job")
             self.ui.printer.toggle()

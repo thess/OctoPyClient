@@ -1,7 +1,4 @@
-
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+# Controls available when printing
 
 from octopyclient.common import CommonPanel, Singleton
 from .panels.extrude import ExtrudePanel

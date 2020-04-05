@@ -56,15 +56,6 @@ button.file-list {
 	margin: 0px;
 }
 
-entry {
-	font-size: 24px;
-	background-color: #20292F;
-	border-radius: 0;
-	padding-left: 1em;
-	margin-left: 1em;
-	padding-right: 1em;
-}
-
 .dialog {
         border: 2px solid #333333;
         font-size: 16px;
