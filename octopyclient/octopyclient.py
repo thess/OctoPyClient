@@ -7,17 +7,18 @@ Hostname or IP of OctoPrint server installation (default: localhost:5000)
 
 Command-line opts:
 
--h, --help      This text
--l, --loglevel  Specify log verbosity level (INFO, WARN, etc.)
--f, --log       Specify log file (default stdout)
--k, --key       Octoprint API key (mandatory)
--s, --style     Location of CSS style sheet (default: style.css)
--l, --layout    Screen resolution (default: 480x320)
--c, --config    Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
+-h, --help        This text
+-l, --loglevel    Log verbosity [DEBUG, INFO, WARNING, etc.] level (default: WARNING)
+-f, --log         Log file path (default: stdout)
+-k, --key         Octoprint API key (mandatory)
+-s, --style       Location of CSS style sheet (default: style.css)
+-r, --resolution  Screen resolution (default: 480x320)
+-c, --config      Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
+-p, --preset      Default temperature preset from OctoPrint (default: PLA)
 
 """
 
-__version__ = "0.9.11"
+__version__ = "0.9.12"
 
 import sys
 import os
@@ -25,15 +26,13 @@ import getopt
 import logging
 import yaml
 
-from attr import dataclass
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from .ui import UI
 from .utils import getStylePath, setStyleBase
-from .common import LogHandler
+from .common import Config
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -44,12 +43,6 @@ class Usage(Exception):
 
 HOMEPI = "/home/pi/"
 CONFIGFILE = ".octoprint/config.yaml"
-
-@dataclass
-class config:
-    api_key:    str
-    host:       str
-    port:       int
 
 def findConfigFile():
     file = doFindConfigFile(HOMEPI)
@@ -109,20 +102,19 @@ def main(argv=None):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hl:f:k:s:r:c:", ["help", "loglevel=", "log=", "key=",
-                                                                "style=", "resolution=", "config="])
+            opts, args = getopt.getopt(argv[1:], "hl:f:k:s:r:c:p:", ["help", "loglevel=", "log=", "key=",
+                                                                "style=", "resolution=", "config=", "preset="])
         except getopt.error as msg:
             raise Usage(msg)
 
         # Gather command options
         loglevel = logging.WARNING
         logfile = None
-        width = 480
-        height = 320
         style_sheet = getStylePath("style.css")
 
         # OctoPrint config defaults
-        cfg = config(None, "localhost", 5000)
+        cfg = Config(api_key=None, host="localhost", port=5000,
+                     width=480, height=320, preset="PLA")
 
         # Find and parse possible local OctoPrint config file
         octoprintConfig = findConfigFile()
@@ -147,18 +139,20 @@ def main(argv=None):
             elif o in ['-r', '--resolution']:
                 try:
                     size = v.split('x')
-                    width = int(size[0])
-                    height = int(size[1])
+                    cfg.width = int(size[0])
+                    cfg.height = int(size[1])
                 except:
                     raise Usage("Screen resolution invalid")
             elif o in ['-c', '--config']:
-                    readConfigFile(v, cfg)
+                readConfigFile(v, cfg)
+            elif o in ['-p', '--preset']:
+                cfg.profile = v
 
         # Remaining arg is octoprint host
         if len(args) == 1:
-            hostURI = args[0]
+            hostURL = args[0]
         else:
-            hostURI = "http://{:s}:{:d}".format(cfg.host, cfg.port)
+            hostURL = "http://{:s}:{:d}".format(cfg.host, cfg.port)
 
         if cfg.api_key is None:
             raise Usage("Octoprint API key required")
@@ -179,7 +173,7 @@ def main(argv=None):
             settings = Gtk.Settings.get_default()
             settings.set_property("gtk_application_prefer_dark_theme", True)
 
-            ui = UI(hostURI, cfg.api_key, width, height, style_sheet)
+            ui = UI(hostURL, cfg, style_sheet)
 
             ui.show_all()
             ui.n.notify('READY=1')

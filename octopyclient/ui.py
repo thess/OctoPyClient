@@ -5,9 +5,9 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
+from octopyclient.common import BackgroundTask, LogHandler, Config
 from .octorest.octorest import OctoRest
 from .splash import SplashPanel
-from octopyclient.common import BackgroundTask, LogHandler
 from .idle_status import IdleStatusPanel
 from .print_status import PrintStatusPanel
 from octopyclient.utils import *
@@ -64,17 +64,17 @@ class UI(Gtk.Window):
 
     _current:   Gtk.Widget  # Active panel
     _host:      str         # URL of OctoPrint server
-    _key:       str         # API key
     mainwin:    Gtk.Window  # Main UI window
     scalef:     float       # Display scale factor (480w := 1.0)
+    config:     Config      # Config class struct
 
-    def __init__(self, host, key, width, height, style_sheet):
+    def __init__(self, hostURL, cfg, style_sheet):
         Gtk.Window.__init__(self, title="OctoPyClient")
 
         self.mainwin = self
-        self._host = host
-        self._key = key
-        self.scalef = 1.5 if width > 480 else 1.0
+        self._host = hostURL
+        self.config = cfg
+        self.scalef = 1.5 if self.config.width > 480 else 1.0
         self._current = None
         # Navigation backup fence
         self._backtrack.append(None)
@@ -99,7 +99,7 @@ class UI(Gtk.Window):
         context = Gtk.StyleContext()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        self.set_default_size(width, height)
+        self.set_default_size(self.config.width, self.config.height)
         self.set_resizable(False)
         # Remove window manager (optional)
         # self.set_decorated(False)
@@ -171,7 +171,7 @@ class UI(Gtk.Window):
 
         # Connect if not open yet
         if self.printer is None:
-            self.printer, errMsg = open_client(self._host, self._key)
+            self.printer, errMsg = open_client(self._host, self.config.api_key)
 
         if self.printer is not None:
             try:

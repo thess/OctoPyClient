@@ -16,6 +16,15 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+# Command-line config parameters
+@dataclass
+class Config:
+    api_key:    str     # OctoPrint REST API key
+    host:       str     # OctoPrint host
+    port:       int     # OctoPrint server port
+    width:      int     # Display size
+    height:     int
+    preset:     str     # Default temperature preset
 
 class TimerTask(threading.Timer):
     def __init__(self, name, interval, callback, event):

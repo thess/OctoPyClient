@@ -12,6 +12,7 @@ import logging
 
 log = logging.getLogger('OctoPyClient')
 
+# Location of style sheet and images root
 _stylesheet_base = os.path.realpath(os.path.dirname(__file__))
 
 def setStyleBase(path):

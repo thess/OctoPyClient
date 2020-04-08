@@ -4,7 +4,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from octopyclient.common import CommonPanel, BackgroundTask, Singleton
+from octopyclient.common import BackgroundTask, Singleton
 from .panels.files import FilesPanel
 from octopyclient.igtk import *
 from .menu import *
@@ -35,8 +35,8 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
         self.updateTemperature()
 
     def showTools(self, ui):
-        self.extruder = Tool("Extruder", "extruder2.svg", ui.printer)
-        self.bed = Tool("Bed", "bed2.svg", ui.printer)
+        self.extruder = Tool("Extruder", "extruder2.svg", ui)
+        self.bed = Tool("Bed", "bed2.svg", ui)
 
         g = Gtk.Grid()
         g.set_row_homogeneous(True)
@@ -71,10 +71,10 @@ class Tool:
     button:     Gtk.Button
     image:      str
 
-    def __init__(self, name, image, printer):
+    def __init__(self, name, image, ui):
         self.name = name
         self.image = image
-        self.printer = printer
+        self._ui = ui
         self.isHeating = False
         self.button = ButtonImageFromFile("", image, None)
         self.button.connect("clicked", self.clicked)
@@ -87,10 +87,10 @@ class Tool:
 
         if self.name == "Bed":
             # Bed target heatup request
-            self.printer.bed_target(target)
+            self._ui.printer.bed_target(target)
         else:
             # Extruder heatup
-            self.printer.tool_target(target)
+            self._ui.printer.tool_target(target)
 
     def updateStatus(self, heating):
         ctx = self.button.get_style_context()
@@ -109,7 +109,7 @@ class Tool:
     def getProfileTemperature(self, source):
         temperature = 0
         try:
-            settings = self.printer.settings()
+            settings = self._ui.printer.settings()
             profiles = settings['temperature']['profiles']
         except Exception as err:
             log.error("Get printer profiles: {}".format(str(err)))
@@ -117,7 +117,7 @@ class Tool:
 
         try:
             for p in profiles:
-                if p['name'] == 'PLA':
+                if p['name'] == self._ui.config.preset:
                     if self.name == "Bed":
                         temperature = p['bed']
                         break
@@ -125,7 +125,7 @@ class Tool:
                         temperature = p['extruder']
                         break
         except Exception as err:
-            log.warning("PLA profile not found: {}".format(str(err)))
+            log.warning("{} profile not found: {:s}".format(self._ui.config.preset, str(err)))
 
         if temperature == 0:
             if self.name == "Bed":

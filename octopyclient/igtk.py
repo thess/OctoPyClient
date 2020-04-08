@@ -1,5 +1,5 @@
 # Misc wrapper functions for Gtk object manipulation
-import time
+
 from attr import dataclass
 from typing import Callable
 

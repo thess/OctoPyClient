@@ -1,6 +1,12 @@
+import sys
 import re
 import os
 from setuptools import setup
+
+# Python 3.6+ required
+PYTHON_MINVER = (3, 6)
+if sys.version_info < PYTHON_MINVER:
+    sys.exit("Python %s.%s or later is required.\n" % PYTHON_MINVER)
 
 INSTALL_REQUIRES = [
     "PyGObject",
@@ -47,6 +53,7 @@ setup(
     package_data={ 'octopyclient': ["styles/*", "styles/images/*"]},
     install_requires=INSTALL_REQUIRES, extras_require=EXTRAS_REQUIRE,
     author="Ted Hess", author_email="thess@kitschensync.net", license="LICENSE",
+    maintainer="Ted Hess", maintainer_email="thess@kitschensync.net",
     url="https://github.com/thess/OctoPyClient",
     description="OctoPrint touchscreen client",
     long_description=readme,

@@ -1,7 +1,7 @@
 # Misc control functions and OctoPrint user defined commands and controls
 
-from octopyclient.utils import *
 from octopyclient.common import CommonPanel, Singleton
+from octopyclient.utils import *
 from octopyclient.igtk import *
 
 controls = [{'name':'Motors Off', 'icon':'motor-off', 'command':'M18'},
