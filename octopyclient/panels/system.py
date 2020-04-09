@@ -59,7 +59,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         try:
             v = self.ui.printer.version
             text = "<b>{:s} ({:s})</b>".format(v['server'], v['api'])
-        except RuntimeError:
+        except (RuntimeError, AttributeError):
             text = "<b><i>Not connected</i></b>"
 
         info.add(FmtLabel(text))
