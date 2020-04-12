@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+if [ -z $1 ]; then
+	mode=$(cat /sys/class/backlight/soc\:backlight/brightness)
+	((mode ^= 1))
+else
+	[ "$1" = "on" ] && mode=1
+	[ "$1" = "off" ] && mode=0
+fi
+
+echo "$mode" > /sys/class/backlight/soc\:backlight/brightness

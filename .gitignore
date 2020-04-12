@@ -3,5 +3,8 @@ __pycache__
 venv
 build
 dist
+deb_dist
 OctoPyClient.egg-info
+*.tar.gz
 mkrelease
+mkdebpkg

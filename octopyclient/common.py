@@ -152,11 +152,19 @@ class LogHandler(logging.Handler):
         self.nBox.set_valign(Gtk.Align.START)
         self.nBox.set_halign(Gtk.Align.CENTER)
         self.nBox.set_hexpand(True)
+        self.evt = None
 
     def handle(self, record):
+        # Warnings and Errors only
         if record.levelno < logging.WARNING:
             return
+        # Make sure there isn't another error showing
+        while self.evt is not None:
+            # pump events
+            while Gtk.events_pending():
+                Gtk.main_iteration()
 
+        # WARNINGS get 4sec, ERRORS 10sec
         dpyTime = 4.0 if record.levelno == logging.WARNING else 10.0
 
         # Create pop-up message box label with formatted text
@@ -180,4 +188,8 @@ class LogHandler(logging.Handler):
     def buttonPressed(self, parent=None, button=None):
         # Cancel timer (if necessary)
         self.tt.cancel()
-        GLib.idle_add(self.evt.destroy)
+        GLib.idle_add(self.evtDestroy)
+
+    def evtDestroy(self):
+        self.evt.destroy()
+        self.evt = None

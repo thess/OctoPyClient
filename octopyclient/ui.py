@@ -190,14 +190,14 @@ class UI(Gtk.Window):
                     newUiState = "splash"
                     splashMessage = "Startup..."
                 elif isConnecting(self.pState):
-                        splashMessage = "Printer state: " + self.pState + "..."
+                    splashMessage = "Printer state: " + self.pState + "..."
             except Exception as err:
                 # After 10sec - display reason
                 if (int(time.time()) - self.now) > 10:
                     splashMessage = errToUser(err)
                     newUiState = "splash"
                 elif not isRemoteDisconnect(err):
-                    log.error("Getting printer state: {}".format(str(err)))
+                    log.error("Getting printer state: {}".format(errToUser(err)))
                 else:
                     log.debug("Ignoring remote disconnect")
         else:

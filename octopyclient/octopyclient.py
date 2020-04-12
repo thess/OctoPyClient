@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-  OctoPyClient [opts] [server]
+  octopyclient [opts] [server]
 
 Hostname or IP of OctoPrint server installation (default: localhost:5000)
 
@@ -18,7 +18,7 @@ Command-line opts:
 
 """
 
-__version__ = "0.9.12"
+__version__ = "0.9.13"
 
 import sys
 import os
@@ -189,7 +189,7 @@ def main(argv=None):
             logging.exception("Caught network or other error:")
 
     except Usage as err:
-        eprint("OctoPrint ({:s}) touchscreen client\n".format(__version__))
+        eprint("OctoPyClient ({:s}) - Touchscreen client for OctoPrint\n".format(__version__))
         eprint(err.msg)
         eprint("for help use --help")
         return 2

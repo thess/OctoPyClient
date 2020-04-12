@@ -1,6 +1,5 @@
 import sys
 import re
-import os
 from setuptools import setup
 
 # Python 3.6+ required
@@ -21,12 +20,12 @@ INSTALL_REQUIRES = [
 ]
 
 # Notes to self (IMMV):
-# Install and setup display drivers Ex: Adafruit PiTFT installer
-#    $ sudo ./adafruit-pitft.sh
 # [Optional] Install build tools
 #    $ sudo apt install git build-essential pkg-config
 # X11 requirements if console only system installed. Ex: Raspbian Lite
 #    $ sudo apt install xorg
+# [Hardware/vendor specific] Install/configure display drivers and setup for X11
+# Install the necessary Python3 environment and GTK+3 dependencies
 # General python3 installation requirements
 #    $ sudo apt install python3-pip python3-dev python3-setuptools python3-virtualenv virtualenv
 # Install system PyGObject, pycairo, pyyaml
@@ -41,8 +40,8 @@ INSTALL_REQUIRES = [
 
 EXTRAS_REQUIRE = {}
 
-version = re.search('^__version__\s*=\s*"(.*)"',
-    open('octopyclient/octopyclient.py').read(), re.M).group(1)
+version = re.search('^__version__\\s*=\\s*"(.*)"',
+                    open('octopyclient/octopyclient.py').read(), re.M).group(1)
 
 with open("README.md", "r") as fh:
     readme = fh.read()
@@ -50,15 +49,15 @@ with open("README.md", "r") as fh:
 setup(
     name="OctoPyClient", version=version,
     packages=['octopyclient', 'octopyclient/octorest', 'octopyclient/panels'],
-    package_data={ 'octopyclient': ["styles/*", "styles/images/*"]},
+    package_data={'octopyclient': ["styles/*", "styles/images/*"]},
     install_requires=INSTALL_REQUIRES, extras_require=EXTRAS_REQUIRE,
     author="Ted Hess", author_email="thess@kitschensync.net", license="LICENSE",
     maintainer="Ted Hess", maintainer_email="thess@kitschensync.net",
     url="https://github.com/thess/OctoPyClient",
-    description="OctoPrint touchscreen client",
+    description="OctoPyClient - A touchscreen client for OctoPrint",
     long_description=readme,
     long_description_content_type="text/markdown",
-    entry_points={ "console_scripts": ['octopyclient = octopyclient.octopyclient:main'] },
+    entry_points={'console_scripts': ['octopyclient = octopyclient.octopyclient:main']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
