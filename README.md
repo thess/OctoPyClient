@@ -3,13 +3,13 @@ An [OctoPrint](https://octoprint.org) client interface for small TFT touch-scree
 
 OctoPyClient can be installed on any X11 server either with or without a window-manager. It has been designed to support small displays with at least 480x320 resolution. The Adafruit PiTFT Plus 480x320 3.5" TFT+Touchscreen mounted on a Raspberry Pi 3B was the target configuration. Displays with larger resolutions such as 800x480 are compatible. Layout and size of display objects can be modified by an alternative style sheet provided by the `--style` option.
 
-OctoPyClient may be installed (co-located) with an OctoPrint server or may be used remotely on a Linux Desktop within a window. Any system with the appropriate Python3 (>=3.6) and GTK+3 support should, in all likelyhood, work reasonalby well. Raspian Buster (Debian 10) is supported, Raspian Stretch (Python 3.5) is not.
+OctoPyClient may be installed (co-located) with an OctoPrint server or may be used remotely on a Linux Desktop within a window. Any system with the appropriate Python3 (>=3.6) and GTK+3 support should, in all likelihood, work reasonably well. Raspian Buster (Debian 10) is supported, Raspian Stretch (Python 3.5) is not.
 
 This is currently a work-in-progress. It is actively being developed. Expect to see frequent updates, changes to internal structure, work-flow and user interface aspects. Documentation and installation information will be added as functional base-levels become somewhat complete and stable.
 
 ## Installation
 
-This application is heavily dependent on GTK/GDK and touch-screen display interfaces. System requirements for installing and executing OctoPyClient include proper setup of an X11 server for your choosen display hardware and the necessary Python GTK and Cairo libraries. My recommendation is to install distribution provided Python3 libraries for GTK and Cairo rather than attempting to build them as a setup requirement. Getting the correct build dependencies for installing PyGObject and pycairo with PIP is possible, but tricky.
+This application is heavily dependent on GTK/GDK and touch-screen display interfaces. System requirements for installing and executing OctoPyClient include proper setup of an X11 server for your chosen display hardware and the necessary Python GTK and Cairo libraries. My recommendation is to install distribution provided Python3 libraries for GTK and Cairo rather than attempting to build them as a setup requirement. Getting the correct build dependencies for installing PyGObject and pycairo with PIP is possible, but tricky.
 
 Setting up on Raspian and other Debian based distributions like Ubuntu, etc., the minimum release version that supports Python 3.6 or later is required. Ex: Debian 10 (Buster) or Ubuntu 18.04 (Bionic).
 
@@ -77,9 +77,9 @@ Client launch location, display target and command-line options can be specified
 
 ### Main menu
 
-![TopMenu](https://imgur.com/KGJdy5g)
+![idle_status](https://raw.githubusercontent.com/thess/octopyclient/master/doc/images/idle_status.png)
 
 #### Thanks to the following GitHub projects for code, ideas and icon images:
 
-* OctoPrint REST API inetrface in Python by _dougbrion/OctoRest_
+* OctoPrint REST API interface in Python by _dougbrion/OctoRest_
 * Images/icons and general program flow from _mcaudros/OctoPrint-TFT_ and _Z-Bolt/OctoScreen_
