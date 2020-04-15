@@ -1,4 +1,5 @@
 import sys
+import os
 import re
 from setuptools import setup
 
@@ -43,7 +44,12 @@ EXTRAS_REQUIRE = {}
 version = re.search('^__version__\\s*=\\s*"(.*)"',
                     open('octopyclient/octopyclient.py').read(), re.M).group(1)
 
-with open("README.md", "r") as fh:
+if 'DEBIAN_DESCRIPTION' in os.environ:
+    readmeDoc = os.environ['DEBIAN_DESCRIPTION']
+else:
+    readmeDoc = "README.md"
+
+with open(readmeDoc, "r") as fh:
     readme = fh.read()
 
 setup(
@@ -59,6 +65,7 @@ setup(
     long_description_content_type="text/markdown",
     entry_points={'console_scripts': ['octopyclient = octopyclient.octopyclient:main']},
     classifiers=[
+
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",

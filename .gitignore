@@ -8,3 +8,4 @@ OctoPyClient.egg-info
 *.tar.gz
 mkrelease
 mkdebpkg
+cleanbuilds
