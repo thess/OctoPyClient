@@ -48,8 +48,9 @@ Setting up on Raspian and other Debian based distributions like Ubuntu, etc., th
 *Not complete yet - TBD*
 
 #### Systemd service configuration
-See example files in the `service_files` directory to install OctoPyClient as the display_manager service for graphical_target startup. It may also be necessary to set the default startup target, for example:
+See example files in the `service_files` directory to install OctoPyClient as the display_manager service for graphical_target startup. It may also be necessary to set the default startup target after enabling `octopyclient.service`, Ex:
 
+        $ systemctl enable octopyclient.service
         $ systemctl set-default graphical.target
 
 Client launch location, display target and command-line options can be specified by modifying the environment file located in `/etc/octopyclient.env`.
@@ -73,6 +74,7 @@ Client launch location, display target and command-line options can be specified
         -r, --resolution  Screen resolution (default: 480x320)
         -c, --config      Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
         -p, --preset      Default temperature preset from OctoPrint (default: PLA)
+            --noblank     Disable DPMS and screen-saver blanking
 
 
 ### Main menu

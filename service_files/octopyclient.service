@@ -6,14 +6,16 @@ After=systemd-user-sessions.service getty@tty7.service plymouth-quit.service
 [Service]
 Type=notify
 NotifyAccess=all
-EnvironmentFile=/etc/octopyclient.env
-ExecStart=/usr/bin/xinit ${OCTOPYCLIENT_LOCATION}/octopyclient -k $API_KEY \
-	$LOGGING_LEVEL $LOG_FILE $RESOLUTION $OPT_ARGS $OCTOPRINT_URL -- $DISPLAY -nolisten tcp -nocursor
-ExecStartPost=-/usr/local/bin/dpy on
-ExecStopPost=-/usr/local/bin/dpy off
 Restart=always
 RestartSec=10s
 TimeoutStopSec=5s
+EnvironmentFile=/etc/octopyclient.env
+ExecStart=/usr/bin/xinit ${OCTOPYCLIENT_LOCATION}/octopyclient -k $API_KEY \
+	$LOGGING_LEVEL $LOG_FILE $RESOLUTION $OPT_ARGS $OCTOPRINT_URL -- $DISPLAY -nolisten tcp -nocursor
+#Optionial commands to clear display upon exit (and on again at start)
+# Remove comments if dpy script installed
+#ExecStartPre=-/usr/local/bin/dpy on
+#ExecStopPost=-/usr/local/bin/dpy off
 
 [Install]
 WantedBy=graphical.target

@@ -15,7 +15,7 @@ Command-line opts:
 -r, --resolution  Screen resolution (default: 480x320)
 -c, --config      Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
 -p, --preset      Default temperature preset from OctoPrint (default: PLA)
-
+    --noblank     Disable DPMS and screen-saver blanking
 """
 
 __version__ = "0.9.15"
@@ -96,6 +96,12 @@ def readConfigFile(configFile, cfg):
 
     return
 
+def dpyNoBlank(screen):
+    if screen == '':
+        screen = ':0'
+    display = "DISPLAY={} ".format(screen)
+    os.system(display + "xset s off; xset -dpms; xset s noblank")
+
 def main(argv=None):
     # Parse any command-line args
     if argv is None:
@@ -103,7 +109,7 @@ def main(argv=None):
     try:
         try:
             opts, args = getopt.getopt(argv[1:], "hl:f:k:s:r:c:p:", ["help", "loglevel=", "log=", "key=",
-                                                                "style=", "resolution=", "config=", "preset="])
+                                                                "style=", "resolution=", "config=", "preset=", "noblank"])
         except getopt.error as msg:
             raise Usage(msg)
 
@@ -147,6 +153,8 @@ def main(argv=None):
                 readConfigFile(v, cfg)
             elif o in ['-p', '--preset']:
                 cfg.profile = v
+            elif o == '--noblank':
+                dpyNoBlank(os.getenv('DISPLAY'))
 
         # Remaining arg is octoprint host
         if len(args) == 1:
