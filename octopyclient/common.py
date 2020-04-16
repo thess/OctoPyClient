@@ -156,13 +156,10 @@ class LogHandler(logging.Handler):
 
     def handle(self, record):
         # Warnings and Errors only
-        if record.levelno < logging.WARNING:
+        # Make sure there isn't another error showing (avoid recursion)
+        if (record.levelno < logging.WARNING) or \
+                (self.evt is not None):
             return
-        # Make sure there isn't another error showing
-        while self.evt is not None:
-            # pump events
-            while Gtk.events_pending():
-                Gtk.main_iteration()
 
         # WARNINGS get 4sec, ERRORS 10sec
         dpyTime = 4.0 if record.levelno == logging.WARNING else 10.0
@@ -185,11 +182,12 @@ class LogHandler(logging.Handler):
         self.tt = threading.Timer(dpyTime, self.buttonPressed)
         self.tt.start()
 
+    # Note: This function may be called by a timer thread or the main thread
     def buttonPressed(self, parent=None, button=None):
         # Cancel timer (if necessary)
         self.tt.cancel()
-        GLib.idle_add(self.evtDestroy)
+        GLib.idle_add(self.evtRemove)
 
-    def evtDestroy(self):
+    def evtRemove(self):
         self.evt.destroy()
         self.evt = None
