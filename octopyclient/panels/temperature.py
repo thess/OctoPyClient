@@ -34,14 +34,14 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
         if pcount > 6:
             self.panelH = 3
 
-        self.addButton(self.createProfileButton("cool-down.svg", {'name':'Cool Down', 'bed':0, 'extruder':0}))
+        self.addButton(self.createProfileButton("cool-down.svg", {'name':'Off', 'bed':0, 'extruder':0}))
 
     def createProfileButton(self, img, profile):
-        btn = ButtonImageFromFile(profile['name'], img, self.doSetProfile, profile)
+        btn = ButtonImageScaled(profile['name'], img, IMAGE_SIZE_NORMAL, self.doSetProfile, profile)
         return btn
 
     def doSetProfile(self, button, profile):
-        for tool in self.tp.toolButtons:
+        for tool in self.tp.toolImages:
             temp = profile['extruder']
             if tool == "bed":
                 temp = profile['bed']
@@ -55,7 +55,7 @@ class ProfilePanel(CommonPanel, metaclass=Singleton):
 class TemperaturePanel(CommonPanel, metaclass=Singleton):
     tool:           StepButton    # Tool selector
     amount:         StepButton    # Temperature delta selector
-    toolButtons:    {}            # Dictionary of tools and associated button image
+    toolImages:     {}            # Dictionary of tools and associated button image
 
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
@@ -66,18 +66,19 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         self.g.attach(self.createChangeButton("Increase", "increase.svg", 1), 0, 0, 1, 1)
         self.g.attach(self.createChangeButton("Decrease", "decrease.svg", -1), 3, 0, 1, 1)
 
-        self.toolButtons = {}
+        self.toolImages = {}
         self.g.attach(self.createToolButton(), 0, 1, 1, 1)
 
-        self.load = ButtonImageFromFile("Load", "extrude.svg", self.doLoadFilament)
+        self.load = ButtonImageScaled("Load", "extrude.svg", IMAGE_SIZE_NORMAL, self.doLoadFilament)
         self.g.attach(self.load, 1, 1, 1, 1)
-        self.unload = ButtonImageFromFile("Unload", "retract.svg", self.doUnloadFilament)
+        self.unload = ButtonImageScaled("Unload", "retract.svg", IMAGE_SIZE_NORMAL, self.doUnloadFilament)
         self.g.attach(self.unload, 2, 1, 1, 1)
 
         self.amount = createStepButton("move-step.svg",
                                        [("10°C", 10.0), ("5°C", 5.0), ("1°C", 1.0)])
         self.g.attach(self.amount.b, 1, 0, 1, 1)
-        self.g.attach(ButtonImageFromFile("Presets", "heat-up.svg", self.showProfile), 2, 0, 1, 1)
+        self.g.attach(ButtonImageScaled("Presets", "heat-up.svg", IMAGE_SIZE_NORMAL, self.showProfile),
+                      2, 0, 1, 1)
 
         self.arrangeButtons()
 
@@ -99,7 +100,7 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
             self.unload.set_sensitive(True)
             img = "extruder2.svg"
 
-        self.tool.b.set_image(ImageFromFile(img))
+        self.tool.b.set_image(self.toolImages[self.tool.steps[self.tool.idx][1]])
         self.updateToolData()
 
     def doChangeTarget(self, pb, direction):
@@ -150,7 +151,8 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
             img = "bed2.svg"
 
         log.info("Adding tool: {:s}".format(name))
-        self.toolButtons[name] = ButtonImageFromFile("", img, None)
+        self.toolImages[name] = \
+            ImageFromFileWithSize(img, displayScale(IMAGE_SIZE_NORMAL))
         addStep(self.tool, ("", name))
         self.changeTool()
 
@@ -163,11 +165,17 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
 
         toolTemps = printer_state['temperature']
         for tool in toolTemps:
-            if tool not in self.toolButtons:
+            if tool not in self.toolImages:
                 self.addNewTool(tool)
-            # Display temperature data
-            txt = "{:.0f}°C ⇒ {:.0f}°C".format(toolTemps[tool]['actual'], toolTemps[tool]['target'])
-            self.tool.b.set_label(txt)
+            # Only update label if tool being displayed
+            if self.tool.steps[self.tool.idx][1] == tool:
+                # Display temperature data
+                if self.ui.config.width < 480:
+                    template = "{:.0f} / {:.0f}"
+                else:
+                    template = "{:.0f}°C ⇒ {:.0f}°C"
+                txt = template.format(toolTemps[tool]['actual'], toolTemps[tool]['target'])
+                self.tool.b.set_label(txt)
 
     # Prusa/Marlin based firmware support M701/M702 codes
     def doLoadFilament(self):

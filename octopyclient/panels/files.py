@@ -71,10 +71,10 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return bar
 
     def createRefreshButton(self):
-        return ButtonImageWithSize("refresh.svg", self.Scaled(35), self.Scaled(35), self.doLoadFiles)
+        return ButtonImageWithSize("refresh.svg", IMAGE_SIZE_SMALL, self.doLoadFiles)
 
     def createBackButton(self):
-        return ButtonImageWithSize("back.svg", self.Scaled(35), self.Scaled(35), self.filesNavigate)
+        return ButtonImageWithSize("back.svg", IMAGE_SIZE_SMALL, self.filesNavigate)
 
     def filesNavigate(self, source):
         if isRoot(self.location):
@@ -116,11 +116,12 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         frame = Gtk.Frame()
 
         name = Gtk.Label(f['name'])
-        name.set_markup("<big>{:s}</big>".format(strEllipsis(f['name'])))
+        name.get_style_context().add_class("foldername")
+        name.set_markup("{:s}".format(strEllipsis(f['name'])))
         name.set_hexpand(True)
         name.set_halign(Gtk.Align.START)
-        name.set_margin_top(15)
-        name.set_margin_start(10)
+        name.set_margin_top(displayScale(15))
+        name.set_margin_start(displayScale(10))
 
         # info = Gtk.Label()
         # info.set_halign(Gtk.Align.START)
@@ -135,13 +136,13 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         actions.add(self.createOpenFolderButton(f))
 
         file = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        file.set_margin_top(5)
-        file.set_margin_bottom(5)
-        file.set_margin_start(15)
-        file.set_margin_end(15)
+        file.set_margin_top(displayScale(5))
+        file.set_margin_bottom(displayScale(5))
+        file.set_margin_start(displayScale(15))
+        file.set_margin_end(displayScale(15))
         file.set_hexpand(True)
 
-        file.add(ImageFromFileWithSize("folder.svg", self.Scaled(35), self.Scaled(35)))
+        file.add(ImageFromFileWithSize("folder.svg", displayScale(20)))
         file.add(labels)
         file.add(actions)
 
@@ -152,15 +153,21 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         frame = Gtk.Frame()
 
         name = Gtk.Label(f['name'])
-        name.set_markup("<small>{:s}</small>".format(strEllipsis(f['name'])))
+        name.get_style_context().add_class("filename")
+        name.set_markup("{:s}".format(strEllipsis(f['name'])))
         name.set_hexpand(True)
         name.set_halign(Gtk.Align.START)
-        name.set_margin_top(5)
+        name.set_margin_top(displayScale(5))
 
         info = Gtk.Label()
+        info.get_style_context().add_class("fileinfo")
         info.set_halign(Gtk.Align.START)
-        info.set_markup("<small>Uploaded: <b>{:s}</b> - Size: <b>{:s}</b></small>"
-                        .format(humanize.naturaltime(time.time() - f['date']), humanize.naturalsize(f['size'])))
+        # No room for upload date-time if small display
+        if self.ui.config.width < 480:
+            info.set_markup("Size: <b>{:s}</b>".format(humanize.naturalsize(f['size'])))
+        else:
+            info.set_markup("Uploaded: <b>{:s}</b> - Size: <b>{:s}</b>"
+                            .format(humanize.naturaltime(time.time() - f['date']), humanize.naturalsize(f['size'])))
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         labels.add(name)
         labels.add(info)
@@ -171,13 +178,13 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         actions.set_halign(Gtk.Align.END)
 
         file = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        file.set_margin_top(5)
-        file.set_margin_bottom(5)
-        file.set_margin_start(5)
-        file.set_margin_end(15)
+        file.set_margin_top(displayScale(5))
+        file.set_margin_bottom(displayScale(5))
+        file.set_margin_start(displayScale(5))
+        file.set_margin_end(displayScale(15))
         file.set_hexpand(True)
 
-        file.add(ImageFromFileWithSize("file.svg", self.Scaled(35), self.Scaled(35)))
+        file.add(ImageFromFileWithSize("file.svg", displayScale(IMAGE_SIZE_SMALL)))
         file.add(labels)
         file.add(actions)
 
@@ -185,7 +192,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         list.add(frame)
 
     def createOpenFolderButton(self, folder):
-        b = ButtonImageWithSize("open.svg", self.Scaled(35), self.Scaled(35), self.openFolder, folder)
+        b = ButtonImageWithSize("open.svg", displayScale(IMAGE_SIZE_SMALL), self.openFolder, folder)
 
         ctx = b.get_style_context()
         # ctx.add_class("color1")
@@ -194,7 +201,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return b
 
     def createPrintButton(self, img, file):
-        b = ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askPrintFile, file)
+        b = ButtonImageWithSize(img, displayScale(IMAGE_SIZE_SMALL), self.askPrintFile, file)
 
         ctx = b.get_style_context()
         # ctx.add_class("color3")
@@ -203,7 +210,7 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
         return b
 
     def createDeleteButton(self, img, file):
-        b = ButtonImageWithSize(img, self.Scaled(35), self.Scaled(35), self.askDeleteFile, file)
+        b = ButtonImageWithSize(img, displayScale(IMAGE_SIZE_SMALL), self.askDeleteFile, file)
 
         ctx = b.get_style_context()
         # ctx.add_class("color2")
@@ -217,12 +224,12 @@ class FilesPanel(CommonPanel, metaclass=Singleton):
 
     def askPrintFile(self, source, file):
         confirmDialog(self, "Send file to printer?\n\n<b>{:s}</b>"
-                      .format(strEllipsisLen(file['name'], 27)), doPrintFile, file)
+                            .format(strEllipsisLen(file['name'], displayScale(27))), doPrintFile, file)
 
     def askDeleteFile(self, source, file):
         msg = "Delete file?" if not isFolder(file) else "Remove folder and its contents?"
         confirmDialog(self, "{:s}\n\n<b>{:s}</b>"
-                      .format(msg, strEllipsisLen(file['name'], 27)), doDeleteFile, file)
+                            .format(msg, strEllipsisLen(file['name'], displayScale(27))), doDeleteFile, file)
 
 def doPrintFile(panel, file):
     try:

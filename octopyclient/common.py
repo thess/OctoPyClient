@@ -104,7 +104,7 @@ class CommonPanel:
             self.addButton(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0))
 
         if bAddBack:
-            self.addButton(ButtonImageFromFile("Back", "back.svg", self.ui.navigateBack))
+            self.addButton(ButtonImageScaled("Back", "back.svg", IMAGE_SIZE_NORMAL, self.ui.navigateBack))
 
     def addButton(self, btn):
         x = int(len(self.buttons) % self.panelW)
@@ -119,9 +119,6 @@ class CommonPanel:
     def Hide(self):
         if self.bkgnd is not None:
             self.bkgnd.cancel()
-
-    def Scaled(self, val):
-        return self.ui.scalef * val
 
     def arrangeMenuItems(self, grid, items, cols):
         from .menu import getPanel

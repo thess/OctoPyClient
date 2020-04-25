@@ -11,7 +11,7 @@ from gi.repository import GLib
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
-from .utils import imagePath
+from .utils import *
 
 def FmtLabel(string, *args):
     l = Gtk.Label()
@@ -26,7 +26,18 @@ def ImageFromFile(imgname):
         return Gtk.Image.new_from_stock(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
     return img
 
-def ImageFromFileWithSize(imgname, w, h):
+def ImageFromFileScaled(imgname):
+    try:
+        p = GdkPixbuf.Pixbuf.new_from_file(imagePath(imgname))
+        w = displayScale(p.get_width())
+        h = displayScale(p.get_height())
+        ps = p.scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
+        img = Gtk.Image.new_from_pixbuf(ps)
+    except Exception as err:
+        return Gtk.Image.new_from_stock(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
+    return img
+
+def ImageFromFileWithSize2(imgname, w, h):
     try:
         p = GdkPixbuf.Pixbuf.new_from_file_at_scale(imagePath(imgname), w, h, True)
         img = Gtk.Image.new_from_pixbuf(p)
@@ -34,19 +45,20 @@ def ImageFromFileWithSize(imgname, w, h):
         return Gtk.Image.new_from_stock(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
     return img
 
+def ImageFromFileWithSize(imgname, size):
+    return ImageFromFileWithSize2(imgname, size, size)
+
 @dataclass
 class imageLabel:
     l: Gtk.Label
     b: Gtk.Box
 
-LABEL_IMAGE_SIZE = 20
-
 # LabelWithImage returns a new imageLabel based on a gtk.Box containing
 # a gtk.Label with a gtk.Image, the image is scaled at LABEL_IMAGE_SIZE.
-def LabelWithImage(img, label, *args):
+def LabelWithImage(img, imgSize, label, *args):
     l = FmtLabel(label, args)
     b = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
-    b.add(ImageFromFileWithSize(img, LABEL_IMAGE_SIZE, LABEL_IMAGE_SIZE))
+    b.add(ImageFromFileWithSize(img, displayScale(imgSize)))
     b.add(l)
 
     return imageLabel(l, b)
@@ -65,26 +77,24 @@ def ButtonImage(label, img, clicked, parms=None):
             b.connect("clicked", clicked)
         else:
             b.connect("clicked", clicked, parms)
-
     return b
 
 # Return gtk.Button with image and applied style
 def ButtonImageStyle(label, imgName, style, clicked, parms=None):
-    b = ButtonImageFromFile(label, imgName, clicked, parms)
-
+    b = ButtonImageScaled(label, imgName, IMAGE_SIZE_NORMAL, clicked, parms)
     ctx = b.get_style_context()
     ctx.add_class(style)
-
     return b
 
-# Return gtk.Button with image sized (h x w) as specified
-def ButtonImageWithSize(imgName, h, w, clicked, parms=None):
-    img = ImageFromFileWithSize(imgName, h, w)
+# Return gtk.Button with image sized as specified
+def ButtonImageWithSize(imgName, imgSize, clicked, parms=None):
+    img = ImageFromFileWithSize(imgName, imgSize)
     return ButtonImage(None, img, clicked, parms)
 
-# Return gtk.Button with image expanded to fit
-def ButtonImageFromFile(label, imgName, clicked, parms=None):
-    img = ImageFromFile(imgName)
+# Return gtk.Button with image scaled and expanded to fit
+def ButtonImageScaled(label, imgName, imgSize, clicked, parms=None):
+    scaledSize = displayScale(imgSize)
+    img = ImageFromFileWithSize(imgName, scaledSize)
     b = ButtonImage(label, img, clicked, parms)
     b.set_vexpand(True)
     b.set_hexpand(True)
@@ -104,7 +114,7 @@ def createStepButton(image, steps, callback=None):
 
     sb = StepButton(idx = 0, steps=steps, stcb=callback, b=None)
     # Fill in struct with button reference
-    sb.b = ButtonImageFromFile(lbl, image, advStep, sb)
+    sb.b = ButtonImageScaled(lbl, image, IMAGE_SIZE_NORMAL, advStep, sb)
 
     return sb
 
@@ -130,7 +140,7 @@ class PressedButton:
     cbint:      int         # callback interval (ms)
 
 def createPressedButton(label, image, ms, pressed, param=None):
-    btn = ButtonImageFromFile(label, image, None)
+    btn = ButtonImageScaled(label, image, IMAGE_SIZE_NORMAL, None)
     pb = PressedButton(False, btn, pressed, ms)
 
     if pressed is not None:

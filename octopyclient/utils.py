@@ -14,8 +14,29 @@ log = logging.getLogger('OctoPyClient')
 
 # Location of style sheet and images root
 _stylesheet_base = os.path.realpath(os.path.dirname(__file__))
+# Display scale factor (480x320 := 1.0)
+_display_scale: float
+
+IMAGE_SIZE_LARGE = 85
+IMAGE_SIZE_NORMAL = 60
+IMAGE_SIZE_SMALL = 35
+IMAGE_SIZE_ICON = 25
+
+def setDisplayScale(factor):
+    global _display_scale
+    _display_scale = factor
+
+def displayScale(val):
+    return int(_display_scale * val)
+
+def getTemperatureText(dpyWidth):
+    if dpyWidth < 480:
+        return "Temp."
+    else:
+        return "Temperature"
 
 def setStyleBase(path):
+    global _stylesheet_base
     _stylesheet_base = path
 
 def getStylePath(target):
@@ -106,10 +127,10 @@ def confirmDialog(panel, msg, cb, param):
     dlg.set_markup(msg)
 
     box = dlg.get_content_area()
-    box.set_margin_start(15)
-    box.set_margin_end(15)
-    box.set_margin_top(15)
-    box.set_margin_bottom(15)
+    box.set_margin_start(displayScale(15))
+    box.set_margin_end(displayScale(15))
+    box.set_margin_top(displayScale(15))
+    box.set_margin_bottom(displayScale(15))
 
     ctx = dlg.get_style_context()
     ctx.add_class("dialog")

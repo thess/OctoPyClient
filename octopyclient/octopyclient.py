@@ -18,7 +18,7 @@ Command-line opts:
     --noblank     Disable DPMS and screen-saver blanking
 """
 
-__version__ = "0.9.15"
+__version__ = "0.9.16"
 
 import sys
 import os
@@ -116,7 +116,6 @@ def main(argv=None):
         # Gather command options
         loglevel = logging.WARNING
         logfile = None
-        style_sheet = getStylePath("style.css")
 
         # OctoPrint config defaults
         cfg = Config(api_key=None, host="localhost", port=5000,
@@ -166,7 +165,7 @@ def main(argv=None):
             raise Usage("Octoprint API key required")
 
         try:
-            logfmt = '%(asctime)s.%(msecs)03d  OctoPyClient%(levelname)8s %(filename)s:%(lineno)d - %(message)s'
+            logfmt = '%(asctime)s.%(msecs)03d  OctoPyClient%(levelname)9s %(filename)s:%(lineno)d - %(message)s'
             logtime = '%H:%M:%S'
             # Set root logger level default to ERROR. Set to WARNING when DEBUG requested.
             rootLoglevel = logging.WARNING if loglevel == logging.DEBUG else logging.ERROR
@@ -181,7 +180,7 @@ def main(argv=None):
             settings = Gtk.Settings.get_default()
             settings.set_property("gtk_application_prefer_dark_theme", True)
 
-            ui = UI(hostURL, cfg, style_sheet)
+            ui = UI(hostURL, cfg)
 
             ui.show_all()
             ui.n.notify('READY=1')

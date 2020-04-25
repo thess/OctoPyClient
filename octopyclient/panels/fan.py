@@ -25,7 +25,7 @@ class FanPanel(CommonPanel, metaclass=Singleton):
             label = "{:d} %".format(speed)
             image = "fan.svg"
 
-        return ButtonImageFromFile(label, image, self.setFanSpeed, speed)
+        return ButtonImageScaled(label, image, IMAGE_SIZE_NORMAL, self.setFanSpeed, speed)
 
     def setFanSpeed(self, button, speed):
         log.debug("Setting fans speed: {:d} %".format(speed))

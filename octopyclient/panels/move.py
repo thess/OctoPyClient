@@ -53,7 +53,7 @@ class MovePanel(CommonPanel, metaclass=Singleton):
 
 
     def createHomeButton(self):
-        return ButtonImage("Home All", ImageFromFile("home.svg"), self.doHomeAll)
+        return ButtonImageScaled("Home All", "home.svg", IMAGE_SIZE_NORMAL, self.doHomeAll)
 
     def doHomeAll(self, source):
         try:

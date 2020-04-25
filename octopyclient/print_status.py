@@ -39,9 +39,9 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
     def createProgressBar(self):
         self.pb = Gtk.ProgressBar()
         self.pb.set_show_text(True)
-        self.pb.set_margin_top(10)
-        self.pb.set_margin_left(10)
-        self.pb.set_margin_end(self.Scaled(10))
+        self.pb.set_margin_top(displayScale(10))
+        self.pb.set_margin_left(displayScale(10))
+        self.pb.set_margin_end(displayScale(10))
         self.pb.set_valign(Gtk.Align.CENTER)
         self.pb.set_vexpand(True)
         self.pb.set_name("PrintProg")
@@ -56,20 +56,20 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.g.attach(self.bed, 0, 1, 1, 1)
 
     def createInfoBox(self):
-        self.file = LabelWithImage("file2.svg", "")
+        self.file = LabelWithImage("file2.svg", IMAGE_SIZE_ICON, "")
         self.file.l.set_name("NameLabel")
-        self.left = LabelWithImage("speed-step2.svg", "")
+        self.left = LabelWithImage("speed-step2.svg", IMAGE_SIZE_ICON, "")
         self.left.l.set_name("TimeLabel")
-        self.finish = LabelWithImage("finish.svg", "")
+        self.finish = LabelWithImage("finish.svg", IMAGE_SIZE_ICON, "")
         self.finish.l.set_name("TimeLabel")
 
-        info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=displayScale(5))
         info.set_halign(Gtk.Align.START)
         info.set_hexpand(True)
-        info.set_vexpand(True)
+        info.set_vexpand(False)
         info.set_valign(Gtk.Align.CENTER)
-        info.set_margin_left(10)
-        info.set_margin_top(10)
+        info.set_margin_left(displayScale(10))
+        info.set_margin_top(displayScale(10))
 
         info.add(self.file.b)
         info.add(self.left.b)
@@ -78,29 +78,29 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         return info
 
     def createCompleteButton(self):
-        self.complete = ButtonImageWithSize("complete.svg", self.Scaled(60), self.Scaled(60), self.ui.navigateBack)
+        self.complete = ButtonImageWithSize("complete.svg", displayScale(IMAGE_SIZE_NORMAL), self.ui.navigateBack)
         return self.complete
 
     def createMenuButton(self):
-        self.menu = ButtonImageWithSize("control2.svg", self.Scaled(60), self.Scaled(60), self.openPrintMenu)
+        self.menu = ButtonImageWithSize("control2.svg", displayScale(IMAGE_SIZE_NORMAL), self.openPrintMenu)
         return self.menu
 
     def createPauseButton(self):
-        self.pause = ButtonImageWithSize("pause2.svg", self.Scaled(60), self.Scaled(60), self.doPause)
+        self.pause = ButtonImageWithSize("pause2.svg", displayScale(IMAGE_SIZE_NORMAL), self.doPause)
         return self.pause
 
     def createStopButton(self):
-        self.stop = ButtonImageWithSize("stop2.svg", self.Scaled(60), self.Scaled(60), self.doStop)
+        self.stop = ButtonImageWithSize("stop2.svg", displayScale(IMAGE_SIZE_NORMAL), self.doStop)
         return self.stop
 
     def createToolButton(self, img):
-        b = ButtonImageFromFile("", img, None)
+        b = ButtonImageScaled("", img, IMAGE_SIZE_NORMAL, None)
         ctx = b.get_style_context()
         ctx.add_class("printing-state")
         return b
 
     def createBedButton(self):
-        b = ButtonImage("", "bed2.svg", None)
+        b = ButtonImageScaled("", "bed2.svg", IMAGE_SIZE_NORMAL, None)
         ctx = b.get_style_context()
         ctx.add_class("printing-state")
         return b
@@ -146,11 +146,15 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
         self.updateState(printer_state)
 
         if printer_state['temperature']:
-            text ="{:.0f}°C ⇒ {:.0f}°C ".format(printer_state['temperature']['bed']['actual'],
-                                                printer_state['temperature']['bed']['target'])
+            if self.ui.config.width < 480:
+                template = "{:.0f} / {:.0f}"
+            else:
+                template = "{:.0f}°C ⇒ {:.0f}°C"
+            text = template.format(printer_state['temperature']['bed']['actual'],
+                                   printer_state['temperature']['bed']['target'])
             self.bed.set_label(text)
-            text ="{:.0f}°C ⇒ {:.0f}°C ".format(printer_state['temperature']['tool0']['actual'],
-                                                printer_state['temperature']['tool0']['target'])
+            text = template.format(printer_state['temperature']['tool0']['actual'],
+                                   printer_state['temperature']['tool0']['target'])
             self.tool0.set_label(text)
 
     def updateState(self, printer_state):
@@ -159,7 +163,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
             self.printerStatus = status
             if status['printing']:
                 self.menu.set_sensitive(True)
-                self.pause.set_image(ImageFromFileWithSize("pause2.svg", self.Scaled(60), self.Scaled(60)))
+                self.pause.set_image(ImageFromFileWithSize("pause2.svg", displayScale(IMAGE_SIZE_NORMAL)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
                 self.pause.show()
@@ -169,7 +173,7 @@ class PrintStatusPanel(CommonPanel, metaclass=Singleton):
                 return
             elif status['paused']:
                 self.menu.set_sensitive(True)
-                self.pause.set_image(ImageFromFileWithSize("resume2.svg", self.Scaled(60), self.Scaled(60)))
+                self.pause.set_image(ImageFromFileWithSize("resume2.svg", displayScale(IMAGE_SIZE_NORMAL)))
                 self.pause.set_sensitive(True)
                 self.stop.set_sensitive(True)
                 self.pause.show()
@@ -257,10 +261,10 @@ def confirmStopDialog(panel, printer):
     dlg.set_markup("Stop current print job?")
 
     box = dlg.get_content_area()
-    box.set_margin_start(15)
-    box.set_margin_end(15)
-    box.set_margin_top(15)
-    box.set_margin_bottom(15)
+    box.set_margin_start(displayScale(15))
+    box.set_margin_end(displayScale(15))
+    box.set_margin_top(displayScale(15))
+    box.set_margin_bottom(displayScale(15))
 
     ctx = dlg.get_style_context()
     ctx.add_class("dialog")

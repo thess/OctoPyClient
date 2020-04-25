@@ -36,7 +36,8 @@ class ExtrudePanel(CommonPanel, metaclass=Singleton):
 
         self.amount = createStepButton("move-step.svg", [("1mm", 1), ("5mm", 5), ("10mm", 10)])
         self.g.attach(self.amount.b, 1, 1, 1, 1)
-        self.g.attach(ButtonImageFromFile("Temperature", "heat-up.svg", self.showTemperature), 2, 1, 1, 1)
+        txt = getTemperatureText(self.ui.config.width)
+        self.g.attach(ButtonImageScaled(txt, "heat-up.svg", IMAGE_SIZE_NORMAL, self.showTemperature), 2, 1, 1, 1)
 
         self.g.attach(self.createToolButton(), 0, 1, 1, 1)
 
@@ -93,15 +94,15 @@ class ExtrudePanel(CommonPanel, metaclass=Singleton):
 
     def addNewTool(self, name):
         log.info("Adding tool: {:s}".format(name))
-        self.labels[name] = LabelWithImage("extruder2.svg", "")
+        self.labels[name] = LabelWithImage("extruder2.svg", IMAGE_SIZE_NORMAL, "")
         self.toolData.add(self.labels[name].b)
         addStep(self.tool, (name.capitalize(), name))
 
     def displayTemp(self, tool, temps):
-        txt = "{:s}: {:.0f}°C ⇒ {:.0f}°C".format(tool.capitalize(), temps['actual'], temps['target'])
+        txt = "{:.0f}°C ⇒ {:.0f}°C".format(temps['actual'], temps['target'])
         if self.prevData and temps['target'] > 0:
             if self.prevData[tool]:
-                txt += " ({:.1f}°C)".format(temps['actual'] - self.prevData[tool]['actual'])
+                txt += "\n\t({:.1f}°C)".format(temps['actual'] - self.prevData[tool]['actual'])
 
         self.labels[tool].l.set_label(txt)
         self.labels[tool].b.show_all()

@@ -24,7 +24,9 @@ class PrintMenuPanel(CommonPanel, metaclass=Singleton):
         ctx.add_class("color1")
 
         self.g.attach(self.frb.b, 1, 0, 1, 1)
-        self.g.attach(ButtonImageStyle("Temperature", "heat-up.svg", "color4", self.showTemperature), 2, 0, 1, 1)
+
+        txt = getTemperatureText(self.ui.config.width)
+        self.g.attach(ButtonImageStyle(txt, "heat-up.svg", "color4", self.showTemperature), 2, 0, 1, 1)
         self.g.attach(ButtonImageStyle("Extrude", "filament.svg", "color3", self.showExtrude), 3, 0, 1, 1)
         self.g.attach(ButtonImageStyle("Move", "move.svg", "color4", self.showMove), 0, 1, 1, 1)
 

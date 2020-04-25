@@ -12,8 +12,7 @@ from octopyclient.igtk import *
 class SplashPanel(CommonPanel):
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
-
-        logo = ImageFromFile("logo-octoprint.png")
+        logo = ImageFromFileScaled("logo-octoprint.png")
 
         self.label = FmtLabel("...")
         self.label.set_hexpand(True)
@@ -37,17 +36,18 @@ class SplashPanel(CommonPanel):
 
     def createActionBar(self):
         bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        bar.set_property("height-request", displayScale(120))
         bar.set_halign(Gtk.Align.END)
 
         self.RetryButton = ButtonImageStyle("Retry", "refresh.svg", "color2", self.releaseFromHold)
-        self.RetryButton.set_property("width-request", self.Scaled(80))
+        self.RetryButton.set_property("width-request", displayScale(IMAGE_SIZE_LARGE))
         self.RetryButton.set_property("visible", True)
         bar.add(self.RetryButton)
         ctx = self.RetryButton.get_style_context()
         ctx.add_class("hidden")
 
         sys = ButtonImageStyle("System", "info.svg", "color3", self.showSystem)
-        sys.set_property("width-request", self.Scaled(80))
+        sys.set_property("width-request", displayScale(IMAGE_SIZE_LARGE))
         bar.add(sys)
 
         return bar

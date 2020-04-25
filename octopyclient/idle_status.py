@@ -16,7 +16,7 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
         log.debug("IdleStatusPanel created")
         self.bkgnd = BackgroundTask('temperature_update', 2, self.update, ui)
         # Specify menu buttons
-        menuItems = getDefaultMenu()
+        menuItems = getDefaultMenu(ui.config.width)
         buttons = Gtk.Grid()
         buttons.set_row_homogeneous(True)
         buttons.set_column_homogeneous(True)
@@ -76,7 +76,7 @@ class Tool:
         self.image = image
         self._ui = ui
         self.isHeating = False
-        self.button = ButtonImageFromFile("", image, None)
+        self.button = ButtonImageScaled("", image, IMAGE_SIZE_LARGE, None)
         self.button.connect("clicked", self.clicked)
 
     def clicked(self, source):

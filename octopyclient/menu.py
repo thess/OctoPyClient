@@ -51,5 +51,9 @@ DEFAULT_MENU = [{'name': 'Home', 'icon': 'home2', 'panel': 'home'},
                 {'name': 'Temperature', 'icon': 'heat-up2', 'panel': 'temperature'},
                 {'name': 'System', 'icon': 'info2', 'panel': 'system'}]
 
-def getDefaultMenu():
+def getDefaultMenu(dpyWidth):
+    # Shorten labels if necessary
+    if dpyWidth < 480:
+        DEFAULT_MENU[2]['name'] = 'Temp.'
+        DEFAULT_MENU[1]['items'][3]['name'] = 'Temp.'
     return DEFAULT_MENU

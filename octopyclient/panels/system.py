@@ -24,7 +24,8 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
 
         g.attach(self.createOctoPrintInfo(), 0, 0, 2, 1)
         g.attach(self.createVersionInfo(), 2, 0, 2, 1)
-        g.attach(self.createSystemInfo(), 0, 1, 4, 1)
+        if self.ui.config.width >= 480:
+            g.attach(self.createSystemInfo(), 0, 1, 4, 1)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         box.add(g)
@@ -39,7 +40,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         bar.add(self.createCommandButton('restart', "restart"))
         bar.add(self.createCommandButton('reboot', "reboot2"))
         bar.add(self.createCommandButton('shutdown', "shutdown2"))
-        bar.add(ButtonImageWithSize("back.svg", self.Scaled(60), self.Scaled(60), self.ui.navigateBack))
+        bar.add(ButtonImageWithSize("back.svg", IMAGE_SIZE_NORMAL, self.ui.navigateBack))
 
         return bar
 
@@ -49,10 +50,10 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         info.set_halign(Gtk.Align.CENTER)
         info.set_vexpand(True)
         info.set_valign(Gtk.Align.CENTER)
-        info.set_margin_top(25)
+        info.set_margin_top(displayScale(25))
 
-        logoWidth = self.Scaled(85)
-        img = ImageFromFileWithSize("logo-octoprint.png", logoWidth, int(logoWidth * 1.2))
+        logoWidth = displayScale(85)
+        img = ImageFromFileWithSize2("logo-octoprint.png", int(logoWidth), int(logoWidth * 1.2))
         info.add(img)
 
         info.add(Gtk.Label("OctoPrint Version"))
@@ -83,10 +84,10 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         info.set_valign(Gtk.Align.CENTER)
 
         if log.getEffectiveLevel() < logging.WARNING:
-            logoWidth = self.Scaled(50)
-            img = ImageFromFileWithSize("ks-logo.png", logoWidth, int(logoWidth * 1.5))
+            logoWidth = displayScale(50)
+            img = ImageFromFileWithSize2("ks-logo.png", logoWidth, int(logoWidth * 1.5))
         else:
-            img = ImageFromFileWithSize("python.png", self.Scaled(70), self.Scaled(70))
+            img = ImageFromFileWithSize("python.png", displayScale(70))
         info.add(img)
         info.add(Gtk.Label("OctoPyClient Version"))
         info.add(FmtLabel("<b>{:s}</b>".format(VERSION)))
@@ -112,7 +113,7 @@ class SystemPanel(CommonPanel, metaclass=Singleton):
         return info
 
     def createCommandButton(self, name, image):
-        b = ButtonImageWithSize(image + ".svg", self.Scaled(60), self.Scaled(60), self.askSystemCommand)
+        b = ButtonImageWithSize(image + ".svg", IMAGE_SIZE_NORMAL, self.askSystemCommand)
         b.set_name(name)
         return b
 

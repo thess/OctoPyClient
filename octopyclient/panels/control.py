@@ -75,8 +75,8 @@ class ControlPanel(CommonPanel, metaclass=Singleton):
         else:
             cb = self.execCommand
 
-        btn = ButtonImageFromFile(strEllipsisLen(control['name'], int(self.Scaled(12))),
-                                  imgName+".svg", cb, control)
+        btn = ButtonImageScaled(strEllipsisLen(control['name'], displayScale(12)),
+                                  imgName+".svg", IMAGE_SIZE_NORMAL, cb, control)
         return btn
 
     def createCommandButton(self, command, imgName):
@@ -85,8 +85,8 @@ class ControlPanel(CommonPanel, metaclass=Singleton):
         else:
             cb = self.execSystemCommand
 
-        btn = ButtonImageFromFile(strEllipsisLen(command['name'], int(self.Scaled(12))),
-                                  imgName+".svg", cb, command)
+        btn = ButtonImageScaled(strEllipsisLen(command['name'], displayScale(12)),
+                                  imgName+".svg", IMAGE_SIZE_NORMAL, cb, command)
         return btn
 
     def askSystemCommand(self, source, cmd):

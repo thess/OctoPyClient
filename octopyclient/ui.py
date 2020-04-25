@@ -65,17 +65,30 @@ class UI(Gtk.Window):
     _current:   Gtk.Widget  # Active panel
     _host:      str         # URL of OctoPrint server
     mainwin:    Gtk.Window  # Main UI window
-    scalef:     float       # Display scale factor (480w := 1.0)
     config:     Config      # Config class struct
 
-    def __init__(self, hostURL, cfg, style_sheet):
+    def __init__(self, hostURL, cfg):
         Gtk.Window.__init__(self, title="OctoPyClient")
 
         self.mainwin = self
         self._host = hostURL
         self.config = cfg
-        self.scalef = 1.5 if self.config.width > 480 else 1.0
         self._current = None
+
+        # Sort out icon scale factors
+        if self.config.width <= 320:
+            setDisplayScale(0.6)
+            style_sheet = getStylePath("style320.css")
+        elif self.config.width <= 720:
+            setDisplayScale(1.0)
+            style_sheet = getStylePath("style480.css")
+        elif self.config.width <= 1024:
+            setDisplayScale(1.5)
+            style_sheet = getStylePath("style800.css")
+        else:
+            setDisplayScale(2.0)
+            style_sheet = getStylePath("style2.css")
+
         # Navigation backup fence
         self._backtrack.append(None)
         self.now = int(time.time())
@@ -135,6 +148,10 @@ class UI(Gtk.Window):
         Gtk.main_quit()
 
     def Remove(self, p):
+        # TODO: remove this (maybe assert()
+        winSize = self.mainwin.get_size()
+        if (winSize[0] > self.config.width) or (winSize[1] > self.config.height):
+            log.warning("Unexpected window resize to: {}".format(winSize))
         self.g.remove(p.g)
         p.Hide()
 

@@ -1,0 +1,162 @@
+/* Adapted from OctoPrint-TFT and OctoScreen */
+
+Window {
+	background-color: #13181C;
+	-gtk-icon-shadow: none;
+	font-size: 14px;
+}
+
+
+scrollbar, scrollbar button {
+	border: none;
+	background-color: #13181C;
+}
+
+scrollbar slider {
+	min-width: 10px;
+	border-radius: 2px;
+	background-color: #404E57;
+}
+
+label.foldername {
+	font-size: 14px;
+}
+
+label.filename {
+	font-size: 12px;
+}
+
+label.fileinfo {
+	font-size: 12px;
+}
+
+button {
+	background-image: none;
+	background-color: #13181C;
+	margin: 2px;
+	margin-bottom: 4px;
+	border-radius: 0;
+	border: 0;
+	-gtk-icon-shadow: none;
+}
+
+button:active {
+	background-color: #304C62;
+}
+
+button.color1 {
+	border-bottom: 4px solid #ED6500;
+}
+
+button.color2 {
+	border-bottom: 4px solid #B10080;
+}
+
+button.color3 {
+	border-bottom: 4px solid #009384;
+}
+
+button.color4 {
+	border-bottom: 4px solid #A7E100;
+}
+
+button.active {
+	background-color: #20303D;
+}
+
+button.file-list {
+	margin: 0px;
+}
+
+.dialog {
+        border: 2px solid black;
+        font-size: 12px;
+        padding: 4px;
+	background-color: #000;
+}
+
+.dialog button {
+        padding: 15px 30px 15px 30px;
+        border-bottom: 4px solid #009384;
+}
+
+.message {
+	border: 2px solid #981E1F;
+	font-size: 12px;
+	padding: 20px;
+	color: #FFF;
+	background-color: #981E1F;
+}
+
+.message button {
+	background-color: #FFF;
+	color: #000;
+	padding: 20px 30px 20px 30px;
+}
+
+.notification {
+	background-clip: padding-box;
+	padding: 5px;
+	border-radius: 0 0 5px 5px;
+	opacity: 0.8;
+}
+
+.warning {
+	background-color: rgba(30, 204, 39, 0.7);
+}
+
+.error {
+	background-color: rgba(204, 30, 30, 0.7);
+}
+
+@define-color progress_bg_color #37C8AB;
+
+#PrintProg {
+    color: #00C9B4;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 12px;
+    min-height: 30px;
+    min-width: 45px;
+    margin-top: 8px;
+    margin-bottom: 22px;
+}
+
+#ProgressInfo {
+    background-color: #000;
+}
+
+#NameLabel {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#TimeLabel {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#TempLabel {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+@define-color progress_bg_color #ff6c00;
+@define-color progress_bg_color1 #ffa666;
+
+
+progress, trough {
+	min-height: 14px;
+	border: 1px solid shade (@progress_bg_color, 0.9);
+	color: #000;
+}
+
+progress {
+	background-color: #00C9B4;
+	font-size: 14px;
+	font-weight: lighter;
+}
+
+.hidden {
+    opacity: 0;
+}

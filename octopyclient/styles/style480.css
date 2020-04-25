@@ -18,6 +18,19 @@ scrollbar slider {
 	background-color: #404E57;
 }
 
+
+label.foldername {
+	font-size: 20px;
+}
+
+label.filename {
+	font-size: 14px;
+}
+
+label.fileinfo {
+	font-size: 12px;
+}
+
 button {
 	background-image: none;
 	background-color: #13181C;
@@ -57,9 +70,10 @@ button.file-list {
 }
 
 .dialog {
-        border: 2px solid #333333;
+        border: 2px solid black;
         font-size: 16px;
         padding: 5px;
+	background-color: #000;
 }
 
 .dialog button {
@@ -124,7 +138,7 @@ button.file-list {
 }
 
 #TempLabel {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
 }
 
