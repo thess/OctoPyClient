@@ -127,11 +127,11 @@ class CommonPanel:
             panel = getPanel(self.ui, item)
 
             if panel is not None:
-                    color = "color{:d}".format((i % 4) + 1)
-                    icon = "{:s}.svg".format(item['icon'])
-                    row, column = divmod(i, cols)
-                    grid.attach(ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
-                                column, row, 1, 1)
+                color = "color{:d}".format((i % 4) + 1)
+                icon = "{:s}.svg".format(item['icon'])
+                row, column = divmod(i, cols)
+                grid.attach(ButtonImageStyle(item['name'], icon, color, self.addPanel, panel),
+                            column, row, 1, 1)
 
     def addPanel(self, button, panel):
         self.ui.OpenPanel(panel, self)

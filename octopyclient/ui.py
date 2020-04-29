@@ -66,6 +66,7 @@ class UI(Gtk.Window):
     _host:      str         # URL of OctoPrint server
     mainwin:    Gtk.Window  # Main UI window
     config:     Config      # Config class struct
+    pprofile:   {}          # Printer profile
 
     def __init__(self, hostURL, cfg):
         Gtk.Window.__init__(self, title="OctoPyClient")
@@ -93,6 +94,7 @@ class UI(Gtk.Window):
         self._backtrack.append(None)
         self.now = int(time.time())
         self.printer = None
+        self.pprofile = {}
         self.connectionAttempts = 0
         self.UIState = None
         self.pState = None
@@ -126,6 +128,16 @@ class UI(Gtk.Window):
         self.g = Gtk.Grid()
         o.add(self.g)
         o.add_overlay(self.notify.nBox)
+
+    def isSharedNozzle(self):
+        if not self.pprofile:
+            self.pprofile = self.printer.printer_profile()
+        return self.pprofile['extruder']['sharedNozzle']
+
+    def getToolCount(self):
+        if not self.pprofile:
+            self.pprofile = self.printer.printer_profile()
+        return self.pprofile['extruder']['count']
 
     def OpenPanel(self, panel, back=None):
         if self._current is not None:

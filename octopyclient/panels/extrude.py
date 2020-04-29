@@ -89,12 +89,14 @@ class ExtrudePanel(CommonPanel, metaclass=Singleton):
                 self.addNewTool(tool)
             # Display temperature data
             self.displayTemp(tool, toolTemps[tool])
+            if self.ui.isSharedNozzle():
+                break
         # Save last call data for differential (see: displayTemp)
         self.prevData = toolTemps
 
     def addNewTool(self, name):
         log.info("Adding tool: {:s}".format(name))
-        self.labels[name] = LabelWithImage("extruder2.svg", IMAGE_SIZE_NORMAL, "")
+        self.labels[name] = LabelWithImage("extruder2.svg", IMAGE_SIZE_ICON, "")
         self.toolData.add(self.labels[name].b)
         addStep(self.tool, (name.capitalize(), name))
 
@@ -102,7 +104,9 @@ class ExtrudePanel(CommonPanel, metaclass=Singleton):
         txt = "{:.0f}°C ⇒ {:.0f}°C".format(temps['actual'], temps['target'])
         if self.prevData and temps['target'] > 0:
             if self.prevData[tool]:
-                txt += "\n\t({:.1f}°C)".format(temps['actual'] - self.prevData[tool]['actual'])
+                if self.ui.config.width < 480:
+                    txt += "\n\t"
+                txt += " ({:.1f}°C)".format(temps['actual'] - self.prevData[tool]['actual'])
 
         self.labels[tool].l.set_label(txt)
         self.labels[tool].b.show_all()

@@ -11,7 +11,7 @@ Command-line opts:
 -l, --loglevel    Log verbosity [DEBUG, INFO, WARNING, etc.] level (default: WARNING)
 -f, --log         Log file path (default: stdout)
 -k, --key         Octoprint API key (mandatory)
--s, --style       Location of CSS style sheet (default: style.css)
+-s, --style       Style sheet name (default: style320.css, style480.css, style800.css)
 -r, --resolution  Screen resolution (default: 480x320)
 -c, --config      Location of Octoprint configuration (default: $HOME/.octoprint/config.yaml)
 -p, --preset      Default temperature preset from OctoPrint (default: PLA)

@@ -176,6 +176,9 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
                     template = "{:.0f}°C ⇒ {:.0f}°C"
                 txt = template.format(toolTemps[tool]['actual'], toolTemps[tool]['target'])
                 self.tool.b.set_label(txt)
+            # Quit if only 1 hot-end
+            if tool != 'bed' and self.ui.isSharedNozzle():
+                break
 
     # Prusa/Marlin based firmware support M701/M702 codes
     def doLoadFilament(self):

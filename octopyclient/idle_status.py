@@ -35,7 +35,11 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
         self.updateTemperature()
 
     def showTools(self, ui):
-        self.extruder = Tool("Extruder", "extruder2.svg", ui)
+        if ui.getToolCount() > 1 and not ui.isSharedNozzle():
+            # TODO: Show multi-tool display button if not shared nozzle
+            self.extruder = Tool("Multi-tool", "extruder2.svg", ui)
+        else:
+            self.extruder = Tool("Extruder", "extruder2.svg", ui)
         self.bed = Tool("Bed", "bed2.svg", ui)
 
         g = Gtk.Grid()
@@ -44,7 +48,6 @@ class IdleStatusPanel(CommonPanel, metaclass=Singleton):
         self.g.attach(g, 0, 0, 2, 3)
         g.attach(self.extruder.button, 0, 0, 2, 1)
         g.attach(self.bed.button, 0, 1, 2, 1)
-
 
     def updateTemperature(self):
         try:

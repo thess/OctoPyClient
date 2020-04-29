@@ -1009,7 +1009,18 @@ class OctoRest:
         Retrieves a list of all configured printer profiles.
         """
         return self._get('/api/printerprofiles')
-    
+
+    def printer_profile(self, profile=None):
+        """Retrieve specific printer profile
+        https://docs.octoprint.org/en/master/api/printerprofiles.html#retrieve-a-single-printer-profile
+
+        Retrieves a single, existing printer profile.
+        """
+        # Use default if none given
+        if profile is None:
+            profile='_default'
+        return self._get('/api/printerprofiles/{}'.format(profile))
+
     def add_printer_profile(self, profile_data):
         """Add a new printer profile
         http://docs.octoprint.org/en/master/api/printerprofiles.html#add-a-new-printer-profile
