@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   id="svg4160"
+   viewBox="0 0 60.137677 60.776516"
+   height="60.776516"
+   width="60.13768">
+  <defs
+     id="defs4162" />
+  <metadata
+     id="metadata4165">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-3.5328446,2.2636422)"
+     style="display:inline"
+     id="layer8">
+    <g
+       id="g156"
+       style="display:inline"
+       transform="matrix(0.94821721,0,0,0.94821721,-4.0431969,-14.347886)">
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:2.62389064;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 18.401667,35.258801 h 42.125236 c 0,4.458412 9.473097,8.741199 0,13.375235 H 18.401667 c -8.401667,-4.634036 0,-8.916823 0,-13.375235 z"
+         id="rect4168" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#ff670f;stroke-width:3;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 25.836759,53.108992 40.228325,69.155562 54.1655,53.108992 Z"
+         id="path4710" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 20,30.428572 H 60"
+         id="path4714" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 20,25.428572 H 60"
+         id="path4716" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 20,20.428572 H 60"
+         id="path4718" />
+      <path
+         style="fill:none;stroke:none;stroke-width:0.53600001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 34.812458,60.727914 -5.319943,-5.9375 5.28574,-0.0473 c 2.907157,-0.02602 7.653857,-0.02602 10.548223,0 l 5.262483,0.0473 -5.128555,5.926352 c -2.820705,3.259494 -5.173431,5.931369 -5.22828,5.9375 -0.05485,0.0061 -2.4937,-2.660727 -5.419668,-5.926352 z"
+         id="path4720" />
+      <path
+         style="fill:none;stroke:none;stroke-width:0.53600001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 20.242566,44.2547 V 37.022557 H 39.52828 58.813995 V 44.2547 51.486843 H 39.52828 20.242566 Z"
+         id="path4722" />
+    </g>
+    <g
+       transform="translate(-223.53858,-103.1657)"
+       id="layer1">
+      <g
+         id="g4732"
+         transform="matrix(0.5,0,0,0.5,169.82143,144.85714)">
+        <ellipse
+           ry="14"
+           rx="19.5"
+           cy="19"
+           cx="213.5"
+           id="path918"
+           style="display:inline;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ff670f;stroke-opacity:1" />
+        <text
+           id="text4645"
+           y="25"
+           x="207"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           xml:space="preserve"><tspan
+             y="25"
+             x="207"
+             id="tspan4643">1</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>

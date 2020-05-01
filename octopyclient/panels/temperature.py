@@ -4,6 +4,8 @@ from octopyclient.utils import *
 from octopyclient.common import CommonPanel, Singleton, BackgroundTask
 from octopyclient.igtk import *
 
+# Minimum temperature to allow extruder / filament operations
+EXTRUDE_MIN_TEMP = 180
 
 class ProfilePanel(CommonPanel, metaclass=Singleton):
     def __init__(self, ui, tempPanel):
@@ -56,6 +58,7 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
     tool:           StepButton    # Tool selector
     amount:         StepButton    # Temperature delta selector
     toolImages:     {}            # Dictionary of tools and associated button image
+    ttempData:      {}            # Tool temperature data - last interval
 
     def __init__(self, ui):
         CommonPanel.__init__(self, ui)
@@ -67,6 +70,7 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         self.g.attach(self.createChangeButton("Decrease", "decrease.svg", -1), 3, 0, 1, 1)
 
         self.toolImages = {}
+        self.ttempData = {}
         self.g.attach(self.createToolButton(), 0, 1, 1, 1)
 
         self.load = ButtonImageScaled("Load", "extrude.svg", IMAGE_SIZE_NORMAL, self.doLoadFilament)
@@ -94,11 +98,9 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         if self.tool.steps[self.tool.idx][1] == 'bed':
             self.load.set_sensitive(False)
             self.unload.set_sensitive(False)
-            img = "bed2.svg"
         else:
             self.load.set_sensitive(True)
             self.unload.set_sensitive(True)
-            img = "extruder2.svg"
 
         self.tool.b.set_image(self.toolImages[self.tool.steps[self.tool.idx][1]])
         self.updateToolData()
@@ -146,13 +148,18 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
         self.ui.OpenPanel(ProfilePanel(self.ui, self), self)
 
     def addNewTool(self, name):
-        img = "extruder2.svg"
         if name == "bed":
             img = "bed2.svg"
+        else:
+            # Use overlay images if more than 1 extruder or MMU
+            if self.ui.getToolCount() > 1:
+                img = name + ".svg"
+            else:
+                img = "extruder2.svg"
 
         log.info("Adding tool: {:s}".format(name))
         self.toolImages[name] = \
-            ImageFromFileWithSize(img, displayScale(IMAGE_SIZE_NORMAL))
+                ImageFromFileWithSize(img, displayScale(IMAGE_SIZE_NORMAL))
         addStep(self.tool, ("", name))
         self.changeTool()
 
@@ -163,8 +170,8 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
             log.error("Getting current state: {}".format(str(err)))
             return
 
-        toolTemps = printer_state['temperature']
-        for tool in toolTemps:
+        self.ttempData = printer_state['temperature']
+        for tool in self.ttempData:
             if tool not in self.toolImages:
                 self.addNewTool(tool)
             # Only update label if tool being displayed
@@ -174,21 +181,40 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
                     template = "{:.0f} / {:.0f}"
                 else:
                     template = "{:.0f}°C ⇒ {:.0f}°C"
-                txt = template.format(toolTemps[tool]['actual'], toolTemps[tool]['target'])
+                txt = template.format(self.ttempData[tool]['actual'], self.ttempData[tool]['target'])
                 self.tool.b.set_label(txt)
-            # Quit if only 1 hot-end
-            if tool != 'bed' and self.ui.isSharedNozzle():
-                break
 
     # Prusa/Marlin based firmware support M701/M702 codes
-    def doLoadFilament(self):
-        self.executeGCode("M701")
+    def doLoadFilament(self, source):
+        # Use En for Prusa shared nozzle filament selection
+        if self.ui.getToolCount() > 1:
+            toolSel = 'E' if self.ui.isSharedNozzle() else 'T'
+            self.executeGCode("M701 {:s}{:d}".format(toolSel, self.tool.idx))
+        else:
+            # Single extruder and not MMU
+            self.executeGCode("M701")
 
-    def doUnloadFilament(self):
+    def doUnloadFilament(self, source):
         self.executeGCode("M702")
 
     def executeGCode(self, cmds):
+        # Check extruder temp OK
+        tool = self.tool.steps[self.tool.idx][1]
+        # Ignore if bed selected or no data
+        if tool == 'bed' or not self.ttempData:
+            log.warning("Please select an extruder")
+            return
+
+        # Cannot execute command if extruder too cool
+        if self.ttempData[tool]['target'] > EXTRUDE_MIN_TEMP:
+            if self.ttempData[tool]['actual'] < 0.95 * self.ttempData[tool]['target']:
+                log.warning("Extruder heating, please wait")
+                return
+        else:
+            log.error("Extruder pre-heat required")
+            return
+
         try:
-            self.ui.printer.gcode(cmds)
+           self.ui.printer.gcode(cmds)
         except Exception as err:
             log.error("GCode rejected: {}".format(str(err)))
