@@ -79,7 +79,7 @@ Client launch location, display target and command-line options can be specified
 
 ### Main menu
 
-![idle_status](https://raw.githubusercontent.com/thess/octopyclient/master/doc/images/idle_status.png)
+![idle_status](https://raw.githubusercontent.com/thess/octopyclient/master/doc/screen-shots/idle_status.png)
 
 #### Thanks to the following GitHub projects for code, ideas and icon images:
 
