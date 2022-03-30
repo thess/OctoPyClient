@@ -18,7 +18,7 @@ Command-line opts:
     --noblank     Disable DPMS and screen-saver blanking
 """
 
-__version__ = "0.9.17"
+__version__ = "1.0.1"
 
 import sys
 import os
