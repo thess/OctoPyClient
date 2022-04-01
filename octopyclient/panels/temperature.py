@@ -172,6 +172,9 @@ class TemperaturePanel(CommonPanel, metaclass=Singleton):
 
         self.ttempData = printer_state['temperature']
         for tool in self.ttempData:
+            # Ignore Prusa PINDA('P') and ambient('A') temps
+            if tool == 'A' or tool == 'P':
+                continue
             if tool not in self.toolImages:
                 self.addNewTool(tool)
             # Only update label if tool being displayed
